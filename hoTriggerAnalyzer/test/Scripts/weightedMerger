@@ -1,0 +1,36 @@
+#!/bin/bash
+
+#
+#Script to use the mergeTFileServeHistograms to make a 
+#weighted merger, with weights and dataset names taken 
+#from the Weights text file.
+#
+#Created by Christopher Anelli 6.9.2014
+#
+
+#storageDir="/hadoop/store/user/cranelli/HO_Muon/QCD/"
+inDir="/data/users/cranelli/HOL1Muon_Histograms/QCD/"
+version="/Version_1_0/"
+
+inFileName="/L1MuonHistogram.root"
+
+outDir=$inDir$version"/WeightedMerger/"
+outName="weightedL1MuonHistogram.root"
+
+mkdir $outDir
+
+inFileList=""
+weightList=""
+	
+while read dataset weight
+  do
+  [ "$dataset" == "DataSet" ] && continue # So that header files are skipped  
+  inFileList=$inFileList$inDir$version$dataset$inFileName" " #Space between each input file
+  weightList=$weightList$weight"," #Comma Seaparated
+done < "../WeightingFiles/Weights.txt"  # File weights and datasets are read from 
+
+echo $outDir$outName
+#echo $inFileList
+#echo $weightList
+
+mergeTFileServiceHistograms -o $outDir$outName -w $weightList -i $inFileList

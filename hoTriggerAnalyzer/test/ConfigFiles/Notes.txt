@@ -1,0 +1,8 @@
+These config files were made with cmsDriver.py, or 
+with the exact recipe from Salavat.
+
+Documentation for cmsDriver, can be found by calling:
+cmsDriver.py -h
+
+Sample Call:
+cmsDriver.py reco -s RAW2DIGI,RECO --conditions STARTUP_V4::All --eventcontent RECOSIM

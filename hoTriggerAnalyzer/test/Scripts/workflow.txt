@@ -1,0 +1,9 @@
+These scripts are to merge the crab output for a single data set, calculate the weights that should
+be applied to each dataset (Cross Section / Num Events), and then make a weighted merger over all
+the datasets.
+
+Command to Call
+
+./haddScript
+makeWeights.py
+./weightedMerger  

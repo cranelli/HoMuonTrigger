@@ -1,0 +1,18 @@
+#!/bin/bash
+
+storageDir="/hadoop/store/user/cranelli/HO_Muon/QCD/"
+outputDir="/data/users/cranelli/HOL1Muon_Histograms/QCD/"
+version="Version_1_0"
+fileName="L1MuonHistogram.root"
+
+
+echo $storageDir
+echo $outputDir$version
+
+	
+while read dataset crosssection
+  do
+  [ "$dataset" == "DataSet" ] && continue # So that header files are skipped  
+  mkdir $outputDir/$version/$dataset
+  hadd $outputDir/$version/$dataset/$fileName $storageDir/$version/$dataset/*
+done < "../WeightingFiles/CrossSection.txt"  # Where Cross Sections are read from
