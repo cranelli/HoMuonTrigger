@@ -89,6 +89,9 @@ private:
   std::map<std::string,TH1F*> _h1Eta;
   std::map<std::string,TH1F*> _h1Phi;
   std::map<std::string,TH2F*> _h2EtaPhiMap;
+  std::map<std::string,TH1F*> _h1DeltaEta;
+  std::map<std::string,TH1F*> _h1DeltaPhi;
+  std::map<std::string,TH2F*> _h2DeltaEtaDeltaPhi;
   std::map<std::string,TH1F*> _h1Trig;
   std::map<std::string,TH1F*> _h1Counter;
   
@@ -114,6 +117,7 @@ private:
   void fillL1MuonPtHistograms(float pt, std::string key);
   void fillEnergyHistograms(float energy, std::string key);
   void fillEtaPhiHistograms(float eta, float phi, std::string key);
+  void fillDeltaEtaDeltaPhiHistograms(float deltaEta, float deltaPhi, std::string key);
   void fillCountHistogram(std::string key);
   void fillTrigHistograms(bool trigDecision,std::string key);
       //virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;

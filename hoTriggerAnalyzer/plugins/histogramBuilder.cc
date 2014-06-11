@@ -60,6 +60,7 @@
 using namespace::std;
 
 bool hoBelowThreshold(HORecHit horeco);
+//bool isMipMatch(l1extra::L1MuonParticle l1muon, vector<HORecHit> & hoRecoHitsAboveThreshold);
 bool isInsideRCut(float delta_eta, float delta_phi);
 double WrapCheck(float phi1, float phi2);
 
@@ -179,6 +180,7 @@ histogramBuilder::analyze(const edm::Event& iEvent,
    auto el1Muon = l1Muons->cend();
 
    for( ; bl1Muon != el1Muon; ++bl1Muon ) {
+     fillCountHistogram(l1muon_key);
      fillL1MuonPtHistograms(bl1Muon->pt(), l1muon_key);
      fillEtaPhiHistograms(bl1Muon->eta(), bl1Muon->phi(), l1muon_key);
      //For variable binning
@@ -195,7 +197,7 @@ histogramBuilder::analyze(const edm::Event& iEvent,
    //cout << hoRecoHits.size() << endl;
    auto bho_reco = hoRecoHits->begin();
    auto eho_reco = hoRecoHits->end();
-   
+   fillCountHistogram(horeco_key);
    for(; bho_reco != eho_reco; ++bho_reco){
      //cout << caloGeo->getPosition(bho_reco->id()).eta() << endl;
      
@@ -256,7 +258,7 @@ histogramBuilder::analyze(const edm::Event& iEvent,
     * HO Rec Hits Above Threshold
     */
    
-   string horecoAT_key ="horecoAboveThreshold";
+   string horecoT_key ="horecoAboveThreshold";
 
    //Filter out HO Rec Hits below Threshold.
     
@@ -269,17 +271,17 @@ histogramBuilder::analyze(const edm::Event& iEvent,
    //Handle<HORecHitCollection> hoRecHitsAboveThreshold;
    //HORecHitCollection* hoRecHitsAboveThreshold = new HORecHitCollection(hoRecoHits->size());
    
-   auto bho_recoAT = hoRecoHitsAboveThreshold.begin();
-   auto eho_recoAT = hoRecoHitsAboveThreshold.end();
+   auto bho_recoT = hoRecoHitsAboveThreshold.begin();
+   auto eho_recoT = hoRecoHitsAboveThreshold.end();
    
-   for(; bho_recoAT != eho_recoAT; ++bho_recoAT){
-    
-     fillEnergyHistograms(bho_recoAT->energy(), horecoAT_key);
+   for(; bho_recoT != eho_recoT; ++bho_recoT){
+     fillCountHistogram(horecoT_key);
+     fillEnergyHistograms(bho_recoT->energy(), horecoT_key);
 
-     float hoAT_eta, hoAT_phi;
-     hoAT_eta = caloGeo->getPosition(bho_recoAT->id()).eta();
-     hoAT_phi = caloGeo->getPosition(bho_recoAT->id()).phi();
-     fillEtaPhiHistograms(hoAT_eta, hoAT_phi, horecoAT_key);
+     float hoT_eta, hoT_phi;
+     hoT_eta = caloGeo->getPosition(bho_recoT->id()).eta();
+     hoT_phi = caloGeo->getPosition(bho_recoT->id()).phi();
+     fillEtaPhiHistograms(hoT_eta, hoT_phi, horecoT_key);
    }
 
    /*
@@ -287,24 +289,42 @@ histogramBuilder::analyze(const edm::Event& iEvent,
     */
 
    string l1MuonMipMatch_key = "L1MuonwithMipMatch";
-
+   
+   
    bl1Muon = l1Muons->cbegin();
    el1Muon = l1Muons->cend();
    
    for( ; bl1Muon != el1Muon; ++bl1Muon ){
-     bho_recoAT = hoRecoHitsAboveThreshold.begin();
-     eho_recoAT = hoRecoHitsAboveThreshold.end();
-   
-     for(; bho_recoAT != eho_recoAT; ++bho_recoAT){
 
+     //bool isMipMatch=checkMipMatch();
+     bho_recoT = hoRecoHitsAboveThreshold.begin();
+     eho_recoT = hoRecoHitsAboveThreshold.end();
+   
+     bool mipMatch = false;
+     for(; bho_recoT != eho_recoT; ++bho_recoT){
        float delta_eta, delta_phi;
-       delta_eta = bl1Muon->eta() - caloGeo->getPosition(bho_recoAT->id()).eta();
-       delta_phi = WrapCheck(bl1Muon->phi(), caloGeo->getPosition(bho_recoAT->id()).phi());
-       
+       delta_eta = bl1Muon->eta() - caloGeo->getPosition(bho_recoT->id()).eta();
+       delta_phi = WrapCheck(bl1Muon->phi(), caloGeo->getPosition(bho_recoT->id()).phi());
+       string l1MuonhoReco_key = "L1MuonandHOReco";
+       fillDeltaEtaDeltaPhiHistograms(delta_eta, delta_phi, l1MuonhoReco_key);
        if(isInsideRCut(delta_eta,delta_phi)){
-	 fillL1MuonPtHistograms(bl1Muon->pt(), l1MuonMipMatch_key);
-	 fillEtaPhiHistograms(bl1Muon->eta(), bl1Muon->phi(), l1MuonMipMatch_key);
+	 mipMatch=true; //Only need a single match
+	 //NB It is possible for there to be more than one matched Mip.
+	 string hoRecoMipMatch_key = "HORecowithMipMatch";
+	 fillCountHistogram(hoRecoMipMatch_key);
+	 fillEtaPhiHistograms(caloGeo->getPosition(bho_recoT->id()).eta(),
+			      caloGeo->getPosition(bho_recoT->id()).phi(), hoRecoMipMatch_key);
+	 fillEnergyHistograms(bho_recoT->energy(),hoRecoMipMatch_key);
+	
+	 string l1MuonhoRecomipMatch_key = "L1MuonandHORecowithMipMatch";
+	 fillDeltaEtaDeltaPhiHistograms(delta_eta, delta_phi, l1MuonhoRecomipMatch_key);
        }
+     }
+	 
+     if(mipMatch){
+       fillCountHistogram(l1MuonMipMatch_key);
+       fillL1MuonPtHistograms(bl1Muon->pt(), l1MuonMipMatch_key);
+       fillEtaPhiHistograms(bl1Muon->eta(), bl1Muon->phi(), l1MuonMipMatch_key);
      }
    }
 }
@@ -579,6 +599,36 @@ void histogramBuilder::fillEtaPhiHistograms(float eta, float phi, std::string ke
   _h2EtaPhiMap[key]->Fill(eta, phi);
   
 }
+
+/*
+ *Generic Form to build Delta Eta Delta Phi Histograms 
+ *Type of object (or filtering) specified by the key
+ */
+
+void histogramBuilder::fillDeltaEtaDeltaPhiHistograms(float deltaEta, float deltaPhi, std::string key){
+  //Delta Eta Histograms Fill
+  if(!_h1DeltaEta.count(key)){
+    _h1DeltaEta[key] =  _fileService->make<TH1F>(Form("DeltaEta_%s",key.c_str()), Form("DeltaEta %s",key.c_str()), 
+						 2000, -2.6, 2.6);
+  }
+  _h1DeltaEta[key]->Fill(deltaEta);
+
+  //Delta Eta Histograms Fill                       
+  if(!_h1DeltaPhi.count(key)){
+    _h1DeltaPhi[key] = _fileService->make<TH1F>(Form("DeltaPhi_%s",key.c_str()), Form("DeltaPhi %s",key.c_str()), 
+						2000, -3.14, 3.14);
+  }
+  _h1DeltaPhi[key]->Fill(deltaPhi);
+  
+  //DeltaEta Delta Phi Histograms Fill
+  if(!_h2DeltaEtaDeltaPhi.count(key)){
+    _h2DeltaEtaDeltaPhi[key] = _fileService->make<TH2F>(Form("DeltaEtaDeltaPhi_%s",key.c_str()), 
+							Form("DeltaEtaDeltaPhi %s",key.c_str()),
+							2000, -2.6, 2.6, 2000, -3.14, 3.14);
+  }
+  _h2DeltaEtaDeltaPhi[key]->Fill(deltaEta, deltaPhi);
+}
+
 
 
 //define this as a plug-in
