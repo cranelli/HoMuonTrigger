@@ -1,7 +1,7 @@
-#ifndef __HOMUON_HISTOGRAMBUILDER_H__
-#define __HOMUON_HISTOGRAMBUILDER_H__
+#ifndef __HOMUON_HOMUONANALYZER_H__
+#define __HOMUON_HOMUONANALYZER_H__
 //
-// Class:histogramBuilder
+// Class:hoMuonAnalyzer
 // 
 /*
  Description: Currently the header file for the entire HOMuon Trigger Analysis
@@ -44,19 +44,17 @@
 
 using namespace::std;
 
-/*
 static const float threshold = 0.2;
 static const float deltaR_Max = 0.3;
-*/
 
 //
 // class declaration
 //
 
-class histogramBuilder : public edm::EDAnalyzer {
+class hoMuonAnalyzer : public edm::EDAnalyzer {
 public:
-  explicit histogramBuilder(const edm::ParameterSet&);
-  ~histogramBuilder();
+  explicit hoMuonAnalyzer(const edm::ParameterSet&);
+  ~hoMuonAnalyzer();
   
   static void fillDescriptions(edm::ConfigurationDescriptions& 
 				   descriptions);
@@ -114,7 +112,7 @@ private:
   // bool hoBelowThreshold(HORecHit horeco);
 
 
-  //Helper Functions for histogramBuilder Initilization
+  //Helper Functions for hoMuonAnalyzer Initilization
   //void initializeHistograms();
   void fillL1MuonPtHistograms(float pt, std::string key);
   void fillEnergyHistograms(float energy, std::string key);

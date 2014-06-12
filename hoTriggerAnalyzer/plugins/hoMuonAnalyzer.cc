@@ -17,8 +17,8 @@
 //
 //
 
-//histogramBuilder header file
-#include "Analysis/hoTriggerAnalyzer/interface/histogramBuilder.h"
+//hoMuonAnalyzer header file
+#include "Analysis/hoTriggerAnalyzer/interface/hoMuonAnalyzer.h"
 
 // system include files
 #include <memory>
@@ -59,14 +59,12 @@
 
 using namespace::std;
 
-/*
 bool hoBelowThreshold(HORecHit horeco);
 //bool isMipMatch(l1extra::L1MuonParticle l1muon, vector<HORecHit> & hoRecoHitsAboveThreshold);
 bool isInsideRCut(float delta_eta, float delta_phi);
 double WrapCheck(float phi1, float phi2);
-*/
 
-histogramBuilder::histogramBuilder(const edm::ParameterSet& iConfig){
+hoMuonAnalyzer::hoMuonAnalyzer(const edm::ParameterSet& iConfig){
   
   //now do what ever initialization is needed
  
@@ -97,7 +95,7 @@ histogramBuilder::histogramBuilder(const edm::ParameterSet& iConfig){
 }
 
 
-histogramBuilder::~histogramBuilder()
+hoMuonAnalyzer::~hoMuonAnalyzer()
 {
  
    // do anything here that needs to be done at desctruction time
@@ -114,7 +112,7 @@ histogramBuilder::~histogramBuilder()
 
 // ------------ method called for each event  ------------
 void
-histogramBuilder::analyze(const edm::Event& iEvent, 
+hoMuonAnalyzer::analyze(const edm::Event& iEvent, 
 		       const edm::EventSetup& iSetup)
 {
    using namespace edm;
@@ -263,8 +261,6 @@ histogramBuilder::analyze(const edm::Event& iEvent,
    string horecoT_key ="horecoAboveThreshold";
 
    //Filter out HO Rec Hits below Threshold.
-
-   /*
     
    std::vector<HORecHit> hoRecoHitsAboveThreshold (hoRecoHits->size());
    
@@ -287,13 +283,11 @@ histogramBuilder::analyze(const edm::Event& iEvent,
      hoT_phi = caloGeo->getPosition(bho_recoT->id()).phi();
      fillEtaPhiHistograms(hoT_eta, hoT_phi, horecoT_key);
    }
-   */
 
    /*
     * L1 Muons Matched to a MIP
     */
 
-   /*
    string l1MuonMipMatch_key = "L1MuonwithMipMatch";
    
    
@@ -333,19 +327,18 @@ histogramBuilder::analyze(const edm::Event& iEvent,
        fillEtaPhiHistograms(bl1Muon->eta(), bl1Muon->phi(), l1MuonMipMatch_key);
      }
    }
-   */
 }
 
 
 // ------------ method called once each job just before starting event loop  ------------
 void 
-histogramBuilder::beginJob()
+hoMuonAnalyzer::beginJob()
 {
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
 void 
-histogramBuilder::endJob() 
+hoMuonAnalyzer::endJob() 
 {
   //h1SAMuonPt->Write();
   //fillCountHistogram(eventCounter,"Events");
@@ -355,7 +348,7 @@ histogramBuilder::endJob()
 // ------------ method called when starting to processes a run  ------------
 
 void 
-histogramBuilder::beginRun(const edm::Run& iRun, 
+hoMuonAnalyzer::beginRun(const edm::Run& iRun, 
 			   const edm::EventSetup& evSetup)
 {
 
@@ -402,7 +395,7 @@ histogramBuilder::beginRun(const edm::Run& iRun,
 // ------------ method called when ending the processing of a run  ------------
 
 void 
-histogramBuilder::endRun(const edm::Run& iRun, const edm::EventSetup& evSetup)
+hoMuonAnalyzer::endRun(const edm::Run& iRun, const edm::EventSetup& evSetup)
 {
   
   //Only interested in unique values
@@ -420,7 +413,7 @@ histogramBuilder::endRun(const edm::Run& iRun, const edm::EventSetup& evSetup)
 // ------------ method called when starting to processes a luminosity block  ------------
 /*
 void 
-histogramBuilder::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+hoMuonAnalyzer::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
 {
 }
 */
@@ -428,14 +421,14 @@ histogramBuilder::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSe
 // ------------ method called when ending the processing of a luminosity block  ------------
 /*
 void 
-histogramBuilder::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+hoMuonAnalyzer::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
 {
 }
 */
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
 void
-histogramBuilder::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+hoMuonAnalyzer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   //The following says we do not know what parameters are allowed so do no validation
   // Please change this to state exactly what you do use, even if it is no parameters
   edm::ParameterSetDescription desc;
@@ -449,7 +442,6 @@ histogramBuilder::fillDescriptions(edm::ConfigurationDescriptions& descriptions)
  * Helper Functions for Filter
  */
 
-/*
 bool hoBelowThreshold(HORecHit horeco){
   if(horeco.energy() < threshold) return true;
   return false;
@@ -461,13 +453,12 @@ bool isInsideRCut(float delta_eta, float delta_phi){
   if(pow(delta_eta,2)+pow(delta_phi,2) <= pow(deltaR_Max,2)) return true;
   return false;
 }
-*/
 
 /*
  * Wrap check calcuates the difference between two phi's,
  * making sure they are not more than 2 pi apart.
  */
-/*
+
  double WrapCheck(float phi1, float phi2){
    //double M_PI = (double) 3.14;                                                                     
    double delta_phi = phi1 - phi2;
@@ -479,14 +470,14 @@ bool isInsideRCut(float delta_eta, float delta_phi){
    }
    return delta_phi;
  }
-*/
+
 
 /*
  * Helper Functions for Histograms
  */
 
 /*
-void histogramBuilder::initializeHistograms(){
+void hoMuonAnalyzer::initializeHistograms(){
 
    
   h1L1MuonPt = _fileService->make<TH1F>("h1L1MuonPt",
@@ -522,7 +513,7 @@ void histogramBuilder::initializeHistograms(){
  *Fills the 1 bin.
  */
 
-void histogramBuilder::fillCountHistogram(std::string key){
+void hoMuonAnalyzer::fillCountHistogram(std::string key){
   if(!_h1Counter.count(key)){
     _h1Counter[key] = _fileService->make<TH1F>(Form("%s_Count",key.c_str()), 
 					       Form("%s Count",key.c_str()),
@@ -536,7 +527,7 @@ void histogramBuilder::fillCountHistogram(std::string key){
  *Type of object (or filtering) specified by the key
  */
 
-void histogramBuilder::fillTrigHistograms(bool trigDecision,std::string key){
+void hoMuonAnalyzer::fillTrigHistograms(bool trigDecision,std::string key){
   if(!_h1Trig.count(key)){
     _h1Trig[key] = _fileService->make<TH1F>(Form("%s_Trig",key.c_str()), 
 					    Form("%s Trigger",key.c_str()),
@@ -551,7 +542,7 @@ void histogramBuilder::fillTrigHistograms(bool trigDecision,std::string key){
  *has variable binning
 */
 
-void histogramBuilder::fillL1MuonPtHistograms(float pt, std::string key){
+void hoMuonAnalyzer::fillL1MuonPtHistograms(float pt, std::string key){
   
   if(!_h1L1MuonPt.count(key)){
     float variableBinArray[] = {0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5,6,7,8,9,10,12,14,16,18,20,25,30,35,40,45,50,60,70,80,100,120,140,180};
@@ -570,7 +561,7 @@ void histogramBuilder::fillL1MuonPtHistograms(float pt, std::string key){
  *Type of object (or filtering) specified by the key
  */
 
-void histogramBuilder::fillEnergyHistograms(float energy, std::string key){
+void hoMuonAnalyzer::fillEnergyHistograms(float energy, std::string key){
   if(!_h1Energy.count(key)){
     _h1Energy[key] = _fileService->make<TH1F>(Form("%s_Energy",key.c_str()), 
 					    Form("%s Energy",key.c_str()),
@@ -585,7 +576,7 @@ void histogramBuilder::fillEnergyHistograms(float energy, std::string key){
  *Type of object (or filtering) specified by the key
  */
 
-void histogramBuilder::fillEtaPhiHistograms(float eta, float phi, std::string key){
+void hoMuonAnalyzer::fillEtaPhiHistograms(float eta, float phi, std::string key){
   if(!_h1Eta.count(key)){
     _h1Eta[key] = _fileService->make<TH1F>(Form("Eta_%s",key.c_str()), 
 					   Form("Eta %s",key.c_str()),
@@ -614,7 +605,7 @@ void histogramBuilder::fillEtaPhiHistograms(float eta, float phi, std::string ke
  *Type of object (or filtering) specified by the key
  */
 
-void histogramBuilder::fillDeltaEtaDeltaPhiHistograms(float deltaEta, float deltaPhi, std::string key){
+void hoMuonAnalyzer::fillDeltaEtaDeltaPhiHistograms(float deltaEta, float deltaPhi, std::string key){
   //Delta Eta Histograms Fill
   if(!_h1DeltaEta.count(key)){
     _h1DeltaEta[key] =  _fileService->make<TH1F>(Form("DeltaEta_%s",key.c_str()), Form("DeltaEta %s",key.c_str()), 
@@ -631,7 +622,7 @@ void histogramBuilder::fillDeltaEtaDeltaPhiHistograms(float deltaEta, float delt
   
   //DeltaEta Delta Phi Histograms Fill
   if(!_h2DeltaEtaDeltaPhi.count(key)){
-    _h2DeltaEtaDeltaPhi[key] = _fileService->make<TH2F>(Form("DeltaEtaDeltaPhi_v%s",key.c_str()), 
+    _h2DeltaEtaDeltaPhi[key] = _fileService->make<TH2F>(Form("DeltaEtaDeltaPhi_%s",key.c_str()), 
 							Form("DeltaEtaDeltaPhi %s",key.c_str()),
 							2000, -2.6, 2.6, 2000, -3.14, 3.14);
   }
@@ -641,4 +632,4 @@ void histogramBuilder::fillDeltaEtaDeltaPhiHistograms(float deltaEta, float delt
 
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(histogramBuilder);
+DEFINE_FWK_MODULE(hoMuonAnalyzer);

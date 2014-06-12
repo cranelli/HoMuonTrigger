@@ -14,10 +14,13 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source("PoolSource",
     # replace 'myfile.root' with the source file you want to use
     fileNames = cms.untracked.vstring(
-        'file:/data/users/cranelli/HOL1Muon_Samples/'
-        'Fall13dr/QCD_Pt-300to470_Tune4C_13TeV_pythia8/GEN-SIM-RAW/'
-        'RAW_QCD_Pt-300to470_PU40bx25_POSTLS162_V2.root'
+    'root://xrootd.unl.edu//store//mc/'
+    'Fall13dr/QCD_Pt-300to470_Tune4C_13TeV_pythia8/GEN-SIM-RAW/castor_tsg_PU40bx25_POSTLS162_V2-v1/'
+    '00000/001C52C5-2EA4-E311-AA23-003048678F9C.root'
     )
+    #'file:/data/users/cranelli/HOL1Muon_Samples/'
+    #'Fall13dr/QCD_Pt-300to470_Tune4C_13TeV_pythia8/GEN-SIM-RAW/'
+    #'RAW_QCD_Pt-300to470_PU40bx25_POSTLS162_V2.root'   
 )
 
 # RawToDigi and Necessary Configuartion Files
@@ -44,7 +47,7 @@ process.load('Configuration.StandardSequences.Reconstruction_cff')
 
 
 process.demo = cms.EDAnalyzer(
-    'histogramBuilder',
+    'hoMuonAnalyzer',
     genSrc = cms.InputTag("genParticles"),
     l1MuonSrc=cms.InputTag("l1extraParticles"),
     #stdMuSrc = cms.InputTag("standAloneMuons"),
