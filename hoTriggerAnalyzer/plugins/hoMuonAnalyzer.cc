@@ -50,8 +50,8 @@
 #include "Geometry/Records/interface/CaloGeometryRecord.h"
 //#include "DataFormats/HcalDetId/interface/HcalDetId.h"
 
-#include "TH1F.h"
-#include "TH2.h"
+#include "Analysis/hoTriggerAnalyzer/interface/HistogramBuilder.h"
+#include "Analysis/hoTriggerAnalyzer/interface/CommonFunctions.h"
 
 #include <vector>
 #include <iostream>
@@ -61,8 +61,8 @@ using namespace::std;
 
 bool hoBelowThreshold(HORecHit horeco);
 //bool isMipMatch(l1extra::L1MuonParticle l1muon, vector<HORecHit> & hoRecoHitsAboveThreshold);
-bool isInsideRCut(float delta_eta, float delta_phi);
-double WrapCheck(float phi1, float phi2);
+bool isInsideRCut(float eta1, float eta2, float phi1, float phi2);
+//float WrapCheck(float phi1, float phi2);
 
 hoMuonAnalyzer::hoMuonAnalyzer(const edm::ParameterSet& iConfig){
   
@@ -166,7 +166,7 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
     *
     */
 
-   fillCountHistogram("Events");
+   histogramBuilder.fillCountHistogram("Events");
    
    
 
@@ -180,9 +180,11 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
    auto el1Muon = l1Muons->cend();
 
    for( ; bl1Muon != el1Muon; ++bl1Muon ) {
-     fillCountHistogram(l1muon_key);
-     fillL1MuonPtHistograms(bl1Muon->pt(), l1muon_key);
-     fillEtaPhiHistograms(bl1Muon->eta(), bl1Muon->phi(), l1muon_key);
+     histogramBuilder.fillCountHistogram(l1muon_key);
+     histogramBuilder.fillL1MuonPtHistograms(bl1Muon->pt(), l1muon_key);
+     histogramBuilder.fillEtaPhiHistograms(bl1Muon->eta(), bl1Muon->phi(), 
+					   l1muon_key);
+     //fillEtaPhiHistograms(bl1Muon->eta(), bl1Muon->phi(), l1muon_key);
      //For variable binning
      listL1MuonPt.push_back(bl1Muon->pt());
    }
@@ -197,18 +199,18 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
    //cout << hoRecoHits.size() << endl;
    auto bho_reco = hoRecoHits->begin();
    auto eho_reco = hoRecoHits->end();
-   fillCountHistogram(horeco_key);
+   histogramBuilder.fillCountHistogram(horeco_key);
    for(; bho_reco != eho_reco; ++bho_reco){
      //cout << caloGeo->getPosition(bho_reco->id()).eta() << endl;
      
-     //h1HORecoEnergy->Fill( bho_reco->energy());
+     //h1HORecoEnergy->HistogramBuilder.Fill( bho_reco->energy());
 
-     fillEnergyHistograms(bho_reco->energy(), horeco_key);
+     histogramBuilder.fillEnergyHistograms(bho_reco->energy(), horeco_key);
 
      float ho_eta, ho_phi;
      ho_eta = caloGeo->getPosition(bho_reco->id()).eta();
      ho_phi = caloGeo->getPosition(bho_reco->id()).phi();
-     fillEtaPhiHistograms(ho_eta, ho_phi, horeco_key);
+     histogramBuilder.fillEtaPhiHistograms(ho_eta, ho_phi, horeco_key);
    }
 
 
@@ -222,9 +224,9 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
    //cout << "Error Code: " << iErrorCode << " and Trigger Decision: " << trigDecision << endl;
    
    if(iErrorCode == 0){
-     fillTrigHistograms(trigDecision,m_nameAlgTechTrig);
+     histogramBuilder.fillTrigHistograms(trigDecision,m_nameAlgTechTrig);
      if(trigDecision){
-       fillCountHistogram(m_nameAlgTechTrig);
+       histogramBuilder.fillCountHistogram(m_nameAlgTechTrig);
      }  
      
    } else if (iErrorCode == 1) {
@@ -249,7 +251,7 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
    auto estandAloneMuon = standAloneMuons->cend();
    
    for( ; bstandAloneMuon != estandAloneMuon; ++bstandAloneMuon ) {
-     h1SAMuonPt->Fill(bstandAloneMuon->pt());
+     h1SAMuonPt->HistogramBuilder.Fill(bstandAloneMuon->pt());
       }
    */
 
@@ -265,8 +267,9 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
    std::vector<HORecHit> hoRecoHitsAboveThreshold (hoRecoHits->size());
    
    auto it =std::remove_copy_if (hoRecoHits->begin(), hoRecoHits->end(),
-				 hoRecoHitsAboveThreshold.begin(), hoBelowThreshold);
-   hoRecoHitsAboveThreshold.resize(std::distance(hoRecoHitsAboveThreshold.begin(), it));
+				 hoRecoHitsAboveThreshold.begin(), 
+				 hoBelowThreshold);
+   hoRecoHitsAboveThreshold.resize(std::distance(hoRecoHitsAboveThreshold.begin(),it));
    
    //Handle<HORecHitCollection> hoRecHitsAboveThreshold;
    //HORecHitCollection* hoRecHitsAboveThreshold = new HORecHitCollection(hoRecoHits->size());
@@ -275,13 +278,13 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
    auto eho_recoT = hoRecoHitsAboveThreshold.end();
    
    for(; bho_recoT != eho_recoT; ++bho_recoT){
-     fillCountHistogram(horecoT_key);
-     fillEnergyHistograms(bho_recoT->energy(), horecoT_key);
+     histogramBuilder.fillCountHistogram(horecoT_key);
+     histogramBuilder.fillEnergyHistograms(bho_recoT->energy(), horecoT_key);
 
      float hoT_eta, hoT_phi;
      hoT_eta = caloGeo->getPosition(bho_recoT->id()).eta();
      hoT_phi = caloGeo->getPosition(bho_recoT->id()).phi();
-     fillEtaPhiHistograms(hoT_eta, hoT_phi, horecoT_key);
+     histogramBuilder.fillEtaPhiHistograms(hoT_eta, hoT_phi, horecoT_key);
    }
 
    /*
@@ -302,29 +305,37 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
    
      bool mipMatch = false;
      for(; bho_recoT != eho_recoT; ++bho_recoT){
-       float delta_eta, delta_phi;
-       delta_eta = bl1Muon->eta() - caloGeo->getPosition(bho_recoT->id()).eta();
-       delta_phi = WrapCheck(bl1Muon->phi(), caloGeo->getPosition(bho_recoT->id()).phi());
+       float l1Muon_eta, horeco_eta, l1Muon_phi, horeco_phi;
+       l1Muon_eta = bl1Muon->eta();
+       l1Muon_phi = bl1Muon->phi();
+       horeco_eta = caloGeo->getPosition(bho_recoT->id()).eta();
+       horeco_phi = caloGeo->getPosition(bho_recoT->id()).phi();
+
        string l1MuonhoReco_key = "L1MuonandHOReco";
-       fillDeltaEtaDeltaPhiHistograms(delta_eta, delta_phi, l1MuonhoReco_key);
-       if(isInsideRCut(delta_eta,delta_phi)){
+       histogramBuilder.fillDeltaEtaDeltaPhiHistograms(l1Muon_eta, horeco_eta,
+						       l1Muon_phi, horeco_phi,
+						       l1MuonhoReco_key);
+       if(isInsideRCut(l1Muon_eta, horeco_eta, l1Muon_phi, horeco_phi)){
 	 mipMatch=true; //Only need a single match
 	 //NB It is possible for there to be more than one matched Mip.
 	 string hoRecoMipMatch_key = "HORecowithMipMatch";
-	 fillCountHistogram(hoRecoMipMatch_key);
-	 fillEtaPhiHistograms(caloGeo->getPosition(bho_recoT->id()).eta(),
-			      caloGeo->getPosition(bho_recoT->id()).phi(), hoRecoMipMatch_key);
-	 fillEnergyHistograms(bho_recoT->energy(),hoRecoMipMatch_key);
+	 histogramBuilder.fillCountHistogram(hoRecoMipMatch_key);
+	 histogramBuilder.fillEtaPhiHistograms(caloGeo->getPosition(bho_recoT->id()).eta(),
+					       caloGeo->getPosition(bho_recoT->id()).phi(), 
+					       hoRecoMipMatch_key);
+	 histogramBuilder.fillEnergyHistograms(bho_recoT->energy(),hoRecoMipMatch_key);
 	
 	 string l1MuonhoRecomipMatch_key = "L1MuonandHORecowithMipMatch";
-	 fillDeltaEtaDeltaPhiHistograms(delta_eta, delta_phi, l1MuonhoRecomipMatch_key);
+	 histogramBuilder.fillDeltaEtaDeltaPhiHistograms(l1Muon_eta,horeco_eta,
+							 l1Muon_phi, horeco_phi,
+							 l1MuonhoRecomipMatch_key);
        }
      }
 	 
      if(mipMatch){
-       fillCountHistogram(l1MuonMipMatch_key);
-       fillL1MuonPtHistograms(bl1Muon->pt(), l1MuonMipMatch_key);
-       fillEtaPhiHistograms(bl1Muon->eta(), bl1Muon->phi(), l1MuonMipMatch_key);
+       histogramBuilder.fillCountHistogram(l1MuonMipMatch_key);
+       histogramBuilder.fillL1MuonPtHistograms(bl1Muon->pt(), l1MuonMipMatch_key);
+       histogramBuilder.fillEtaPhiHistograms(bl1Muon->eta(), bl1Muon->phi(), l1MuonMipMatch_key);
      }
    }
 }
@@ -341,7 +352,7 @@ void
 hoMuonAnalyzer::endJob() 
 {
   //h1SAMuonPt->Write();
-  //fillCountHistogram(eventCounter,"Events");
+  //histogramBuilder.fillCountHistogram(eventCounter,"Events");
   //h1EventCounter->Write();
 }
 
@@ -380,7 +391,8 @@ hoMuonAnalyzer::beginRun(const edm::Run& iRun,
   bool useL1EventSetup = true;
   bool useL1GtTriggerMenuLite = true;
   cout << "getL1GtRunCache" << endl;
-  cout << "UseL1EventSetup: " << useL1EventSetup << "UseL1GtTriggerMenuLite :"  << useL1GtTriggerMenuLite << endl;  
+  cout << "UseL1EventSetup: " << useL1EventSetup << "UseL1GtTriggerMenuLite :" 
+       << useL1GtTriggerMenuLite << endl;  
   m_l1GtUtils.getL1GtRunCache(iRun, evSetup, useL1EventSetup, useL1GtTriggerMenuLite);
   
   /*
@@ -448,188 +460,18 @@ bool hoBelowThreshold(HORecHit horeco){
 }
 
 
-bool isInsideRCut(float delta_eta, float delta_phi){
+bool isInsideRCut(float eta1, float eta2, float phi1, float phi2){
+  
+  float delta_eta, delta_phi;
+  CommonFunctions commonFunctions;
+
+  delta_eta = eta1 - eta2;
+  delta_phi = commonFunctions.WrapCheck(phi1,phi2); //Finds difference in phi
+
   //The L1 Muon is compared with all HO Rec Hits above Threshold.
   if(pow(delta_eta,2)+pow(delta_phi,2) <= pow(deltaR_Max,2)) return true;
   return false;
 }
-
-/*
- * Wrap check calcuates the difference between two phi's,
- * making sure they are not more than 2 pi apart.
- */
-
- double WrapCheck(float phi1, float phi2){
-   //double M_PI = (double) 3.14;                                                                     
-   double delta_phi = phi1 - phi2;
-   if(delta_phi < -M_PI){
-     return (2*M_PI + delta_phi);
-   }
-   if(delta_phi > M_PI){
-     return (delta_phi - 2*M_PI);
-   }
-   return delta_phi;
- }
-
-
-/*
- * Helper Functions for Histograms
- */
-
-/*
-void hoMuonAnalyzer::initializeHistograms(){
-
-   
-  h1L1MuonPt = _fileService->make<TH1F>("h1L1MuonPt",
-					"L1 Muon Pt distribution",
-					2010, -5.0, 1000.0);
- 
-  h1L1Muon_Trig_Pt = _fileService->make<TH1F>("h1L1Muon_Trig_Pt",
-					      "L1 Muon with" 
-					      "L1 Trigger Pt distribution",
-					      2000, 0.0, 1000.0);
- 
-  h1HORecoEnergy = _fileService->make<TH1F>("h1HORecoEnergy",
-					"HO Reco Energy distribution",
-					2100, -5.0, 100.0);
- 
-  h1Trig = _fileService->make<TH1F>("h1Trig", 
-				    "Level 1 Trigger",2, 0,2);
-
-  h1SAMuonPt = _fileService->make<TH1F>("h1SAMuonPt",
-					"Stand Alone Muon Pt distribution",
-					2000, 0.0, 1000.0);
-
-  h1SAMuon_Trig_Pt = _fileService->make<TH1F>("h1SAMuon_Trig_Pt",
-					      "Stand Alone Muon with" 
-					      "L1 Trigger Pt distribution",
-					      2000, 0.0, 1000.0);
-}
-*/
-
-/*
- *Generic Form to build Counting Histograms 
- *Type of object (or filtering) specified by the key
- *Fills the 1 bin.
- */
-
-void hoMuonAnalyzer::fillCountHistogram(std::string key){
-  if(!_h1Counter.count(key)){
-    _h1Counter[key] = _fileService->make<TH1F>(Form("%s_Count",key.c_str()), 
-					       Form("%s Count",key.c_str()),
-					       2, 0, 2);  
-  }
-  _h1Counter[key]->Fill(1);
-}
-
-/*
- *Generic Form to build Trigger Histograms 
- *Type of object (or filtering) specified by the key
- */
-
-void hoMuonAnalyzer::fillTrigHistograms(bool trigDecision,std::string key){
-  if(!_h1Trig.count(key)){
-    _h1Trig[key] = _fileService->make<TH1F>(Form("%s_Trig",key.c_str()), 
-					    Form("%s Trigger",key.c_str()),
-					    2, 0, 2);  
-  }
-  _h1Trig[key]->Fill(trigDecision);
-}
-
-/*
- *Generic From to Build L1Muon Pt Histograms
- *Type of object (or filtering) specified by the key
- *has variable binning
-*/
-
-void hoMuonAnalyzer::fillL1MuonPtHistograms(float pt, std::string key){
-  
-  if(!_h1L1MuonPt.count(key)){
-    float variableBinArray[] = {0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5,6,7,8,9,10,12,14,16,18,20,25,30,35,40,45,50,60,70,80,100,120,140,180};
-    
-    _h1L1MuonPt[key] = _fileService->make<TH1F>(Form("%s_Pt",key.c_str()), 
-						Form("%s Pt",key.c_str()),
-						33,
-						variableBinArray);
-  }
-  _h1L1MuonPt[key]->Fill(pt);
-}
-
-
-/*
- *Generic From to Build Energy Histograms
- *Type of object (or filtering) specified by the key
- */
-
-void hoMuonAnalyzer::fillEnergyHistograms(float energy, std::string key){
-  if(!_h1Energy.count(key)){
-    _h1Energy[key] = _fileService->make<TH1F>(Form("%s_Energy",key.c_str()), 
-					    Form("%s Energy",key.c_str()),
-					    2100, -5.0, 100.0);  
-  }
-  _h1Energy[key]->Fill(energy);
-}
-
-
-/*
- *Generic Form to build Eta Phi Histograms 
- *Type of object (or filtering) specified by the key
- */
-
-void hoMuonAnalyzer::fillEtaPhiHistograms(float eta, float phi, std::string key){
-  if(!_h1Eta.count(key)){
-    _h1Eta[key] = _fileService->make<TH1F>(Form("Eta_%s",key.c_str()), 
-					   Form("Eta %s",key.c_str()),
-					   500, -1.5, 1.5);  //HO has 72 iphis and 30 ietas   
-  }
-  _h1Eta[key]->Fill(eta);
-
-  if(!_h1Phi.count(key)){
-    _h1Phi[key] = _fileService->make<TH1F>(Form("Phi_%s",key.c_str()), 
-					   Form("Phi %s",key.c_str()),
-					   500, -3.14, 3.14);  //HO has 72 iphis and 30 ietas
-  }
-  _h1Phi[key]->Fill(phi);
-
-  if(!_h2EtaPhiMap.count(key)){
-    _h2EtaPhiMap[key] = _fileService->make<TH2F>(Form("EtaPhi_%s",key.c_str()), 
-						 Form("EtaPhi %s",key.c_str()),
-						 500, -1.5, 1.5, 500, -3.14, 3.14);  
-  }
-  _h2EtaPhiMap[key]->Fill(eta, phi);
-  
-}
-
-/*
- *Generic Form to build Delta Eta Delta Phi Histograms 
- *Type of object (or filtering) specified by the key
- */
-
-void hoMuonAnalyzer::fillDeltaEtaDeltaPhiHistograms(float deltaEta, float deltaPhi, std::string key){
-  //Delta Eta Histograms Fill
-  if(!_h1DeltaEta.count(key)){
-    _h1DeltaEta[key] =  _fileService->make<TH1F>(Form("DeltaEta_%s",key.c_str()), Form("DeltaEta %s",key.c_str()), 
-						 2000, -2.6, 2.6);
-  }
-  _h1DeltaEta[key]->Fill(deltaEta);
-
-  //Delta Eta Histograms Fill                       
-  if(!_h1DeltaPhi.count(key)){
-    _h1DeltaPhi[key] = _fileService->make<TH1F>(Form("DeltaPhi_%s",key.c_str()), Form("DeltaPhi %s",key.c_str()), 
-						2000, -3.14, 3.14);
-  }
-  _h1DeltaPhi[key]->Fill(deltaPhi);
-  
-  //DeltaEta Delta Phi Histograms Fill
-  if(!_h2DeltaEtaDeltaPhi.count(key)){
-    _h2DeltaEtaDeltaPhi[key] = _fileService->make<TH2F>(Form("DeltaEtaDeltaPhi_%s",key.c_str()), 
-							Form("DeltaEtaDeltaPhi %s",key.c_str()),
-							2000, -2.6, 2.6, 2000, -3.14, 3.14);
-  }
-  _h2DeltaEtaDeltaPhi[key]->Fill(deltaEta, deltaPhi);
-}
-
-
 
 //define this as a plug-in
 DEFINE_FWK_MODULE(hoMuonAnalyzer);

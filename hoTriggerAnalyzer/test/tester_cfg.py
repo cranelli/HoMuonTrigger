@@ -19,20 +19,20 @@ process.source = cms.Source("PoolSource",
 
 # RawToDigi and Necessary Configuartion Files
 process.load('Configuration.StandardSequences.Services_cff')
-process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
-process.load('Configuration.EventContent.EventContent_cff')
-process.load('SimGeneral.MixingModule.mixNoPU_cfi')
-process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
-process.load('Configuration.Geometry.GeometryExtended2015Reco_cff')
+#process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
+#process.load('Configuration.EventContent.EventContent_cff')
+#process.load('SimGeneral.MixingModule.mixNoPU_cfi')
+#process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
+#process.load('Configuration.Geometry.GeometryExtended2015Reco_cff')
 
 #Global Tag
-process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-process.GlobalTag.globaltag='PostLS162_V1::All'
+#process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+#process.GlobalTag.globaltag='PostLS162_V1::All'
 
 process.tester = cms.EDAnalyzer(
     'tester',
-    genSrc = cms.InputTag("genParticles"),
-    l1GlobalTriggerReadoutSrc = cms.InputTag("gtDigis")
+    genSrc = cms.InputTag("genParticles")
+    #l1GlobalTriggerReadoutSrc = cms.InputTag("gtDigis")
     #l1MuonSrc=cms.InputTag("l1extraParticles"),
     #stdMuSrc = cms.InputTag("standAloneMuons"),
     #horecoSrc = cms.InputTag("horeco"),

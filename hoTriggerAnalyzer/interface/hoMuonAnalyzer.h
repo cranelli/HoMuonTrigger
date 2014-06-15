@@ -34,8 +34,7 @@
 #include "L1Trigger/GlobalTriggerAnalyzer/interface/L1GtUtils.h"
 #include "DataFormats/HcalRecHit/interface/HORecHit.h"
 
-#include "TH1F.h"
-#include "TH2.h"
+#include "Analysis/hoTriggerAnalyzer/interface/HistogramBuilder.h"
 
 #include <vector>
 #include <iostream>
@@ -76,24 +75,10 @@ private:
   edm::InputTag _l1MuonInput;
   //edm::InputTag _stdMuInput;
   edm::InputTag _horecoInput;
-
   //edm::InputTag _l1GtTmLInputTag;
 
-  //TH1F* h1L1MuonPt;
-  //TH1F* h1HORecoEnergy;
-  //TH1F* h1SAMuonPt;
-  //TH1F* h1SAMuon_Trig_Pt;
-  //TH1F* h1Trig;
-  std::map<std::string,TH1F*> _h1L1MuonPt;
-  std::map<std::string,TH1F*> _h1Energy;
-  std::map<std::string,TH1F*> _h1Eta;
-  std::map<std::string,TH1F*> _h1Phi;
-  std::map<std::string,TH2F*> _h2EtaPhiMap;
-  std::map<std::string,TH1F*> _h1DeltaEta;
-  std::map<std::string,TH1F*> _h1DeltaPhi;
-  std::map<std::string,TH2F*> _h2DeltaEtaDeltaPhi;
-  std::map<std::string,TH1F*> _h1Trig;
-  std::map<std::string,TH1F*> _h1Counter;
+  HistogramBuilder histogramBuilder;
+
   
   // I would prefer to run without an InputTag, the L1GtUtility should be     
   // able to find it automatically from the Providence information.        
@@ -114,14 +99,10 @@ private:
 
   //Helper Functions for hoMuonAnalyzer Initilization
   //void initializeHistograms();
-  void fillL1MuonPtHistograms(float pt, std::string key);
-  void fillEnergyHistograms(float energy, std::string key);
-  void fillEtaPhiHistograms(float eta, float phi, std::string key);
-  void fillDeltaEtaDeltaPhiHistograms(float deltaEta, float deltaPhi, std::string key);
-  void fillCountHistogram(std::string key);
-  void fillTrigHistograms(bool trigDecision,std::string key);
-      //virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
-      //virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
+
+
+  //virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
+  //virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
 
       // ----------member data ---------------------------
 };

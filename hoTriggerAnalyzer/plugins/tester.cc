@@ -42,6 +42,8 @@
 #include <vector>
 #include <iostream>
 
+#include "Analysis/hoTriggerAnalyzer/interface/HistogramBuilder.h"
+
 
 unsigned int NMaxL1AlgoBit = 128;
 
@@ -75,7 +77,8 @@ private:
   // TTree *ho_muon_tree;
   
   L1GtUtils m_l1GtUtils;
-  
+
+  HistogramBuilder histogramBuilder;
   
   //L1 Readout Record are put in a vector
   std::vector<bool> *vec_l1GlobalTrigger_Decision;
@@ -111,7 +114,7 @@ tester::tester(const edm::ParameterSet& iConfig){
   
   
   _genInput = iConfig.getParameter<edm::InputTag>("genSrc");
-  _l1GlobalTriggerReadoutInput = iConfig.getParameter<edm::InputTag>("l1GlobalTriggerReadoutSrc");
+  //_l1GlobalTriggerReadoutInput = iConfig.getParameter<edm::InputTag>("l1GlobalTriggerReadoutSrc");
   
   //ho_muon_tree = _fileService->make<TTree>("ho_muon_tree", 
   //				   "Generator, Propagator,and Reco Data");
@@ -169,6 +172,17 @@ tester::analyze(const edm::Event& iEvent,
    
    Handle<reco::GenParticleCollection> truthParticles;
    iEvent.getByLabel(_genInput,truthParticles);
+
+   auto btruth = truthParticles->cbegin();
+   auto etruth = truthParticles->cend();
+
+   std::string test_gen_key = "test_gen";
+
+   for(; btruth != etruth; ++btruth){
+     //cout << btruth->eta() << endl;
+     histogramBuilder.fillEtaPhiHistograms(btruth->eta(),btruth->phi(), test_gen_key);
+   }
+
    /*
    delete vec_generator_pdgId; vec_generator_pdgId = new std::vector<int>();
    delete vec_generator_etas; vec_generator_etas = new std::vector<Float_t>();
@@ -186,8 +200,8 @@ tester::analyze(const edm::Event& iEvent,
    }
    */
 
-   Handle<L1GlobalTriggerReadoutRecord> l1GlobalTriggerReadouts;
-   iEvent.getByLabel(_l1GlobalTriggerReadoutInput,l1GlobalTriggerReadouts);
+   //Handle<L1GlobalTriggerReadoutRecord> l1GlobalTriggerReadouts;
+   //iEvent.getByLabel(_l1GlobalTriggerReadoutInput,l1GlobalTriggerReadouts);
 
    /*
    for(unsigned int i=0; i< vec_generator_pdgId->size(); i++){
@@ -225,10 +239,14 @@ tester::endJob()
 void 
 tester::beginRun(const edm::Run & iRun, const edm::EventSetup& evSetup)
 {
+
+  //cout << histogramBuilder.getMyNumber() << endl;
+
   /* 
    *Exploring Provenance
    */
 
+  /*
   typedef std::vector<edm::Provenance const*> Provenances;
   Provenances provenances;
   iRun.getAllProvenance(provenances);
@@ -237,6 +255,7 @@ tester::beginRun(const edm::Run & iRun, const edm::EventSetup& evSetup)
     cout << endl << (*itProv)->friendlyClassName() << ", " << (*itProv)->moduleLabel() << ", "
          << (*itProv)->productInstanceName() << ", " << (*itProv)->processName() << endl;
   }
+  */
   
 }
 
