@@ -45,6 +45,11 @@
 #include "DataFormats/HcalRecHit/interface/HORecHit.h"
 #include "DataFormats/HcalRecHit/interface/HcalRecHitCollections.h"
 #include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutRecord.h"
+#include "DataFormats/HLTReco/interface/TriggerEvent.h"
+#include "DataFormats/HLTReco/interface/TriggerObject.h"
+#include "DataFormats/Common/interface/TriggerResults.h"
+#include "FWCore/Common/interface/TriggerNames.h"
+#include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 
 #include "Geometry/CaloGeometry/interface/CaloGeometry.h"
 #include "Geometry/Records/interface/CaloGeometryRecord.h"
@@ -74,7 +79,8 @@ hoMuonAnalyzer::hoMuonAnalyzer(const edm::ParameterSet& iConfig){
   _l1MuonInput = iConfig.getParameter<edm::InputTag>("l1MuonSrc");
   _horecoInput = iConfig.getParameter<edm::InputTag>("horecoSrc");
   //_stdMuInput = iConfig.getParameter<edm::InputTag>("stdMuSrc");
-  
+  _hltSumAODInput = iConfig.getParameter<edm::InputTag>("hltSumAODSrc");
+  //_hltTriggerResults = iConfig.getParameter<edm::InputTag>("hltResultsSrc");
   // m_l1GtTmLInputTag = iConfig.getParameter<edm::InputTag> ("L1GtTmLInputTag");
   
   m_nameAlgTechTrig="L1_SingleMu7";
@@ -82,15 +88,16 @@ hoMuonAnalyzer::hoMuonAnalyzer(const edm::ParameterSet& iConfig){
   
   //edm::Service<TFileService> _fileService;
     
-  //eventCounter = 0;
 
   //initializeHistograms();
+
+  defineTriggersOfInterest();
 	
   /*
    * Vector to store hold unique L1MuonPt values, for variable binning.
    */
-
   //listL1MuonPt = new vector();
+
   
 }
 
@@ -133,9 +140,25 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
    Handle<HORecHitCollection> hoRecoHits;
    iEvent.getByLabel(_horecoInput, hoRecoHits);
 
+   Handle<trigger::TriggerEvent> aodTriggerEvent;
+   iEvent.getByLabel(_hltSumAODInput, aodTriggerEvent);
+
+   InputTag _hltTrigResultsLabel = edm::InputTag("TriggerResults", "", "HLT");
+   Handle<TriggerResults> hltTriggerResults;
+   iEvent.getByLabel(_hltTrigResultsLabel, hltTriggerResults);
+   const TriggerNames & names = iEvent.triggerNames(*hltTriggerResults);
+   //cout << "Number of names " << names.size() << endl;
+   
+   //For first Event List Triggers
+   /*
+      for(int i =0; i < (int) names.size(); i++){
+     cout << names.triggerName(i) << endl;
+   }
+   */
+   
    ESHandle<CaloGeometry> caloGeo;
    iSetup.get<CaloGeometryRecord>().get(caloGeo);
-   
+
 
    /*
     * Set Up Level 1 Global Trigger Utility
@@ -158,7 +181,6 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
    
    //m_l1GtUtils.retrieveL1GtTriggerMenuLite(iEvent, m_l1GtTmLinputTag);
    
-
 
    /*
     *
@@ -188,7 +210,105 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
      //For variable binning
      listL1MuonPt.push_back(bl1Muon->pt());
    }
+
+   /*
+    * HLT Triggers
+    */
+
    
+   //map<string, string>::iterator itHltNames;
+   
+   // Loop Over all HLT Trigger Names of Interst
+   auto bHLTNames = hltNamesOfInterest.begin();
+   for(; bHLTNames != hltNamesOfInterest.end(); ++bHLTNames){
+     string hlt_key = bHLTNames->first;
+     string hltName = bHLTNames->second;
+     for(int hltNameIndex =0; hltNameIndex < (int) names.size(); hltNameIndex++){
+       if(names.triggerName(hltNameIndex)==hltName){
+	 histogramBuilder.fillTrigHistograms(hltTriggerResults->accept(hltNameIndex), hlt_key);
+	 if(hltTriggerResults->accept(hltNameIndex)){
+	   histogramBuilder.fillCountHistogram(hlt_key);
+	 }
+       }
+     }
+   }
+
+   /*
+   for(int i =0; i< (int) hltTriggerResults->size(); i++) {
+     if(!(hltTriggerResults->accept(i))) continue;
+     std::string name(names.triggerName(i));
+     if(name == hltIsoMu24Name){
+       histogramBuilder.fillCountHistogram(hltIsoMu24_key);
+       cout << name << endl;
+     }
+   */
+	
+	
+
+   // cout << "Trigger Results size " << hltTriggerResults->size() << endl;
+   //std::vector<std::string> hltNames = hltTriggerResults->getTriggerNames();
+   //cout << " HLT names size " << hltNames.size() << endl;
+   
+   
+
+   /*
+    * HLT Filters
+    */
+   
+   //Define TriggerObject Collection
+   trigger::TriggerObjectCollection hltAllObjects = aodTriggerEvent->getObjects();
+    
+   auto bHLTFilters = hltFiltersOfInterest.begin();
+   for(; bHLTFilters != hltFiltersOfInterest.end(); ++bHLTFilters){
+     string hlt_key = bHLTFilters->first;
+     InputTag hltLastFilterTag = bHLTFilters->second;
+     //find the filter index
+     size_t filterIndex = aodTriggerEvent->filterIndex(hltLastFilterTag);  //(hltMu5LastFilterTag);
+     if(filterIndex < aodTriggerEvent->sizeFilters()){
+       //cout << "Trigger Object should be Present" << endl;
+       const trigger::Keys &keys = aodTriggerEvent->filterKeys(filterIndex);
+       for(size_t j=0; j <keys.size(); j++){
+	 //cout << "Size of Keys"<< keys.size()  << endl;
+	 histogramBuilder.fillEtaPhiHistograms(hltAllObjects[keys[j]].eta(),
+					       hltAllObjects[keys[j]].phi(),
+					       hlt_key);
+	 histogramBuilder.fillPtHistograms(hltAllObjects[keys[j]].pt(),
+					   hlt_key);
+       }
+     }
+     
+     /*
+      * Sub Code to see which triggers were in an event,
+      * with a selected filter.
+     for(int i =0; i< (int) hltTriggerResults->size(); i++) {
+       if(!(hltTriggerResults->accept(i))) continue;
+       std::string name(names.triggerName(i));
+       //cout << name << endl;
+     }
+     */
+   }
+   
+
+   /*
+   //For each HLT Filter in the Map, compare with all Filters in the HLT Trigger Event.
+   for(itFilters=filtersMap.begin(); itFilters!=filtersMap.end(); ++itFilters){
+     for(int i =0; i < aodTriggerEvent->sizeFilters(); i++){
+       //Loop over all the HLT Triggers
+       if(aodTriggerEvent->filterTag(i).label()!= itFilters->second) continue;
+       
+       //histogramBuilder.fillEtaPhiHistograms(
+       cout << itFilters->first << endl; 
+       cout << aodTriggerEvent->filterTag(i).label() << endl;
+       trigger::Keys triggerKeys = aodTriggerEvent->filterKeys(i);
+       //auto btriggerKeys = triggerKeys.begin();
+       cout << triggerKeys.size() << endl;
+       for(unsigned int j =0; j < triggerKeys.size(); j++){
+	 cout << "The Trigger Key at " << j << " " << triggerKeys[j] << endl;
+       }
+     }
+   } 
+   */
+
 
    /*
     * HO Reco Hits
@@ -293,7 +413,6 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
 
    string l1MuonMipMatch_key = "L1MuonwithMipMatch";
    
-   
    bl1Muon = l1Muons->cbegin();
    el1Muon = l1Muons->cend();
    
@@ -394,13 +513,21 @@ hoMuonAnalyzer::beginRun(const edm::Run& iRun,
   cout << "UseL1EventSetup: " << useL1EventSetup << "UseL1GtTriggerMenuLite :" 
        << useL1GtTriggerMenuLite << endl;  
   m_l1GtUtils.getL1GtRunCache(iRun, evSetup, useL1EventSetup, useL1GtTriggerMenuLite);
+
+
   
+
   /*
   cout << "Trigger Menu From Provenance: " 
        << m_l1GtUtils.provL1GtTriggerMenuLiteInputTag() << endl;
   */
   
   //m_l1GtUtils.retrieveL1GtTriggerMenuLite(iRun, _l1GtTmLInputTag);
+
+  /*
+   * For the HLT
+   */
+  
 }
 
 
@@ -471,6 +598,27 @@ bool isInsideRCut(float eta1, float eta2, float phi1, float phi2){
   //The L1 Muon is compared with all HO Rec Hits above Threshold.
   if(pow(delta_eta,2)+pow(delta_phi,2) <= pow(deltaR_Max,2)) return true;
   return false;
+}
+
+void hoMuonAnalyzer::defineTriggersOfInterest(){
+  
+  /*
+   * HLT Triggers
+   */
+
+  string hltIsoMu24_key = "hltIsoMu24";
+  hltNamesOfInterest.insert(pair<string, string>(hltIsoMu24_key,"HLT_IsoMu24_v18"));
+  hltFiltersOfInterest.insert(pair<string, edm::InputTag>(hltIsoMu24_key, 
+							  edm::InputTag("hltL3crIsoL1sMu16L1f0L2f16QL3"
+									"f24QL3crIsoRhoFiltered0p15",
+									"","HLT")));
+
+  string hltMu5_key = "hltMu5";
+  hltNamesOfInterest.insert(pair<string, string>(hltMu5_key, "HLT_Mu5_v21"));
+  hltFiltersOfInterest.insert(pair<string, edm::InputTag>(hltMu5_key, 
+							  edm::InputTag("hltL3fL1sMu3L3Filtered5",
+									"","HLT")));
+
 }
 
 //define this as a plug-in

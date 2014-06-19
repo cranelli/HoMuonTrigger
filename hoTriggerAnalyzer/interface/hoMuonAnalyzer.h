@@ -32,6 +32,7 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 #include "L1Trigger/GlobalTriggerAnalyzer/interface/L1GtUtils.h"
+//#include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 #include "DataFormats/HcalRecHit/interface/HORecHit.h"
 
 #include "Analysis/hoTriggerAnalyzer/interface/HistogramBuilder.h"
@@ -76,22 +77,29 @@ private:
   //edm::InputTag _stdMuInput;
   edm::InputTag _horecoInput;
   //edm::InputTag _l1GtTmLInputTag;
-
+  edm::InputTag _hltSumAODInput;
   HistogramBuilder histogramBuilder;
 
   
   // I would prefer to run without an InputTag, the L1GtUtility should be     
   // able to find it automatically from the Providence information.        
-
   //edm::InputTag m_l1GtTmLInputTag;
   
   L1GtUtils m_l1GtUtils;
+  //HLTConfigProvider hltConfig_;  //Copied from HLT TrigReport_h
   string m_nameAlgTechTrig;
   bool trigDecision;
 
   //toFigureOutL1VariableBinning
   std::list<float> listL1MuonPt;
 
+  /*
+   * Maps of selected hlt triggers to get the trigger decisions,
+   * and hlt filters to get the trigger objects.
+   */
+  void defineTriggersOfInterest();
+  map<string, string> hltNamesOfInterest;
+  std::map<std::string, edm::InputTag> hltFiltersOfInterest;
   
   //For Filtering
   // bool hoBelowThreshold(HORecHit horeco);

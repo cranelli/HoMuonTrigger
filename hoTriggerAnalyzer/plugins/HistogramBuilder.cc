@@ -3,9 +3,10 @@
 /*
  * The HistogramBuilder Class contains  
  * functions to build generic histograms of                           
- * different types.  The type of object (or a specific                          
- * selection cut) can be sepecified by the key.                                 
- * All histograms are saved through the TFileService                            
+ * different types.  The type of object (or a specific                      
+ * selection cut) can be sepecified by the key.
+ * All histograms are saved through the TFileService 
+ *                           
  * Created by Christopher Anelli
  * On 6.15.2014
 */
@@ -20,9 +21,9 @@ HistogramBuilder::HistogramBuilder(){
 };
 */
 
-/*                                                                              
- *Counting Histograms                                                           
- *Fills the 1 bin.                                                              
+/*
+ *Counting Histograms
+ *Fills the 1 bin.
  */
 void HistogramBuilder::fillCountHistogram(std::string key){                     
   if(!_h1Counter.count(key)){                                                   
@@ -123,6 +124,30 @@ void HistogramBuilder::fillDeltaEtaDeltaPhiHistograms(float eta1, float eta2,
   }
   _h2DeltaEtaDeltaPhi[key]->Fill(deltaEta, deltaPhi);
 } 
+
+
+/*
+ *Pt Histograms
+ *has variable binning
+ */
+void HistogramBuilder::fillPtHistograms(float pt, std::string key){
+  if(!_h1Pt.count(key)){
+        
+    _h1Pt[key] = _fileService->make<TH1F>(Form("%s_Pt",key.c_str()),
+					  Form("%s Pt",key.c_str()),
+					  800,0,400);
+  } 
+  _h1Pt[key]->Fill(pt);
+
+if(!_h1InvPt.count(key)){
+        
+    _h1InvPt[key] = _fileService->make<TH1F>(Form("%s_InvPt",key.c_str()),
+					  Form("%s Inv Pt",key.c_str()),
+					  800,-1,1);
+  } 
+ _h1InvPt[key]->Fill(1.0/pt);
+}
+
 
 /*
  *L1Muon Pt Histograms

@@ -54,6 +54,7 @@ process.demo = cms.EDAnalyzer(
     l1MuonSrc=cms.InputTag("l1extraParticles"),
     #stdMuSrc = cms.InputTag("standAloneMuons"),
     horecoSrc = cms.InputTag("horeco"),
+    hltSumAODSrc = cms.InputTag("hltTriggerSummaryAOD")
     #L1GtTmLInputTag = cms.InputTag("l1GtTriggerMenuLite")
     )
 
