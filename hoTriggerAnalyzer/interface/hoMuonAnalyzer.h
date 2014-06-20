@@ -33,7 +33,10 @@
 
 #include "L1Trigger/GlobalTriggerAnalyzer/interface/L1GtUtils.h"
 //#include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
+
+#include "DataFormats/L1Trigger/interface/L1MuonParticle.h"
 #include "DataFormats/HcalRecHit/interface/HORecHit.h"
+#include "DataFormats/HLTReco/interface/TriggerObject.h"
 
 #include "Analysis/hoTriggerAnalyzer/interface/HistogramBuilder.h"
 
@@ -44,8 +47,10 @@
 
 using namespace::std;
 
-static const float threshold = 0.2;
-static const float deltaR_Max = 0.3;
+static const float barrel_eta = 1.05;
+static const float threshold = 1.0;
+static const float deltaRMip_Max = 0.3;
+static const float deltaRHLT_Max = 0.5;
 
 //
 // class declaration
@@ -93,13 +98,17 @@ private:
   //toFigureOutL1VariableBinning
   std::list<float> listL1MuonPt;
 
+  vector<l1extra::L1MuonParticle> l1MuonsBarrelWithMip;
+
   /*
    * Maps of selected hlt triggers to get the trigger decisions,
    * and hlt filters to get the trigger objects.
    */
-  void defineTriggersOfInterest();
+  
   map<string, string> hltNamesOfInterest;
   std::map<std::string, edm::InputTag> hltFiltersOfInterest;
+  vector<trigger::TriggerObject> hltTriggerObjects;
+  std::map<std::string, std::vector<trigger::TriggerObject>> hltTriggerObjectsOfInterest;
   
   //For Filtering
   // bool hoBelowThreshold(HORecHit horeco);
@@ -107,7 +116,7 @@ private:
 
   //Helper Functions for hoMuonAnalyzer Initilization
   //void initializeHistograms();
-
+  void defineTriggersOfInterest();
 
   //virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
   //virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
