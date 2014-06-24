@@ -1,8 +1,8 @@
 #!/bin/bash
 
 storageDir="/hadoop/store/user/cranelli/HO_Muon/QCD/"
-outputDir="/data/users/cranelli/HOL1Muon_Histograms/QCD/"
-version="Version_1_0"
+outputDir="/data/users/cranelli/HOL1Muon/HOL1Muon_Histograms/QCD/"
+version="Version_1_3"
 fileName="L1MuonHistogram.root"
 
 

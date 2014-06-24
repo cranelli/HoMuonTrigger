@@ -12,8 +12,8 @@ workDirLoc = '/home/cranelli/HO_Muon/Fall13/RAW/CMSSW_6_2_9/src/'
 #File with Cross Section and Data Set Prefixes
 inFileLoc = workDirLoc + 'Analysis/hoTriggerAnalyzer/test/WeightingFiles/CrossSection.txt'
 #Location of Histograms made from the Data Sets
-rootFileDir = "/data/users/cranelli/HOL1Muon_Histograms/QCD/"
-version = "/Version_1_0/"
+rootFileDir = "/data/users/cranelli/HOL1Muon/HOL1Muon_Histograms/QCD/"
+version = "/Version_1_3/"
 rootFileName = "/L1MuonHistogram.root"
 
 #File where Weights and Data Set Prefixes are Written To
@@ -35,7 +35,7 @@ outFile.write("DataSet".ljust(20)+ "Weight"+ "\n")
 
 for line in inFile:
     entries = line.split()
-    if entries[0] == "Dataset": continue #Skip Header
+    if entries[0] == "DataSet": continue #Skip Header
     dataset = entries[0]
     crossSection = float(entries[1])
 

@@ -47,27 +47,24 @@ class HistogramBuilder {
  private:
 
   std::map<std::string,TH1F*> _h1L1MuonPt;
-
   std::map<std::string,TH1F*> _h1Pt;
   std::map<std::string,TH1F*> _h1InvPt;
-                 
   std::map<std::string,TH1F*> _h1Energy;                                 
-  
   std::map<std::string,TH1F*> _h1Eta;
   std::map<std::string,TH1F*> _h1Phi;
   std::map<std::string,TH2F*> _h2EtaPhiMap;
-  
   std::map<std::string,TH1F*> _h1DeltaEta;                                   
   std::map<std::string,TH1F*> _h1DeltaPhi;
   std::map<std::string,TH2F*> _h2DeltaEtaDeltaPhi;
   std::map<std::string,TH1F*> _h1Trig;
-                                          
   std::map<std::string,TH1F*> _h1Counter; 
   
   /*
    * Helper Functions
    */
 
+  void SetAxises(TH1F * h1, std::string xtitle, std::string ytitle);
+  void SetAxises(TH2F * h2, std::string xtitle, std::string ytitle);
   //float WrapCheck(float phi1, float phi2);
   
 };

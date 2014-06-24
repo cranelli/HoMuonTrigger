@@ -9,8 +9,8 @@
 #
 
 #storageDir="/hadoop/store/user/cranelli/HO_Muon/QCD/"
-inDir="/data/users/cranelli/HOL1Muon_Histograms/QCD/"
-version="/Version_1_0/"
+inDir="/data/users/cranelli/HOL1Muon/HOL1Muon_Histograms/QCD/"
+version="/Version_1_3/"
 
 inFileName="/L1MuonHistogram.root"
 
