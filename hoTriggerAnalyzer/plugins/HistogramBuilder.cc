@@ -48,7 +48,23 @@ void HistogramBuilder::fillTrigHistograms(bool trigDecision,std::string key){
                        
   _h1Trig[key]->Fill(trigDecision);                                        
      
-}      
+}
+
+/*      
+ *Weight Histograms
+ */
+void HistogramBuilder::fillWeightHistograms(float weight,std::string key){ 
+  if(!_h1Weight.count(key)){                                                   
+    _h1Weight[key] = _fileService->make<TH1F>(Form("%s_Weight",key.c_str()),     
+                                            Form("%s Weight",key.c_str()),  
+                                            2, 0, 2);
+    SetAxises(_h1Weight[key],"Weight", "Counts");
+  }                                                      
+                       
+  _h1Weight[key]->Fill(weight);                                        
+     
+}
+      
 
 /*                                          
  *Energy Histograms
@@ -171,7 +187,7 @@ if(!_h1InvPt.count(key)){
 void HistogramBuilder::fillL1MuonPtHistograms(float pt, std::string key){
   if(!_h1L1MuonPt.count(key)){
     
-    float variableBinArray[] = {0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5,6,7,8,9,10,12,14,16,18,20,25,30,35,40,45,50,60,70,80,100,120,140,180};
+    float variableBinArray[] = {0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5,6,7,8,10,12,14,16,18,20,25,30,35,40,45,50,60,70,80,100,120,140,180};
     
     _h1L1MuonPt[key] = _fileService->make<TH1F>(Form("%s_Pt",key.c_str()),
                                                 Form("%s Pt",key.c_str()),
