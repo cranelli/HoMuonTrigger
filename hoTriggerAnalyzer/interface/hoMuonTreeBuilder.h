@@ -44,7 +44,7 @@
 #include "Geometry/CaloGeometry/interface/CaloGeometry.h"
 #include "Geometry/Records/interface/CaloGeometryRecord.h"
 
-#include "Analysis/hoTriggerAnalyzer/interface/HistogramBuilder.h"
+#include "HoMuonTrigger/hoTriggerAnalyzer/interface/HistogramBuilder.h"
 
 #include <TTree.h>
 #include <vector>

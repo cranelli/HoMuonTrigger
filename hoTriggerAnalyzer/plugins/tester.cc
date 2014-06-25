@@ -42,7 +42,7 @@
 #include <vector>
 #include <iostream>
 
-#include "Analysis/hoTriggerAnalyzer/interface/HistogramBuilder.h"
+#include "HoMuonTrigger/hoTriggerAnalyzer/interface/HistogramBuilder.h"
 
 
 unsigned int NMaxL1AlgoBit = 128;

@@ -1,4 +1,4 @@
-#include "Analysis/hoTriggerAnalyzer/interface/CommonFunctions.h"
+#include "HoMuonTrigger/hoTriggerAnalyzer/interface/CommonFunctions.h"
 
 /*
  * The Common Function Class contains  

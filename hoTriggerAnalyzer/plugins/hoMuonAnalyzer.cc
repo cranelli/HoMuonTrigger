@@ -18,7 +18,7 @@
 //
 
 //hoMuonAnalyzer header file
-#include "Analysis/hoTriggerAnalyzer/interface/hoMuonAnalyzer.h"
+#include "HoMuonTrigger/hoTriggerAnalyzer/interface/hoMuonAnalyzer.h"
 
 // system include files
 #include <memory>
@@ -55,8 +55,8 @@
 #include "Geometry/Records/interface/CaloGeometryRecord.h"
 //#include "DataFormats/HcalDetId/interface/HcalDetId.h"
 
-#include "Analysis/hoTriggerAnalyzer/interface/HistogramBuilder.h"
-#include "Analysis/hoTriggerAnalyzer/interface/CommonFunctions.h"
+#include "HoMuonTrigger/hoTriggerAnalyzer/interface/HistogramBuilder.h"
+#include "HoMuonTrigger/hoTriggerAnalyzer/interface/CommonFunctions.h"
 
 #include <vector>
 #include <iostream>
@@ -756,12 +756,14 @@ void hoMuonAnalyzer::defineTriggersOfInterest(){
    * HLT Triggers
    */
 
+  /*
   string hltIsoMu24_key = "hltIsoMu24";
   hltNamesOfInterest.insert(pair<string, string>(hltIsoMu24_key,"HLT_IsoMu24_v18"));
   hltFiltersOfInterest.insert(pair<string, edm::InputTag>(hltIsoMu24_key, 
 							  edm::InputTag("hltL3crIsoL1sMu16L1f0L2f16QL3"
 									"f24QL3crIsoRhoFiltered0p15",
 									"","HLT")));
+  */
 
   string hltMu5_key = "hltMu5";
   hltNamesOfInterest.insert(pair<string, string>(hltMu5_key, "HLT_Mu5_v21"));

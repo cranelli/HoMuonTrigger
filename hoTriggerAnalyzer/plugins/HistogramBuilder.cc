@@ -1,4 +1,4 @@
-#include "Analysis/hoTriggerAnalyzer/interface/HistogramBuilder.h"
+#include "HoMuonTrigger/hoTriggerAnalyzer/interface/HistogramBuilder.h"
 
 /*
  * The HistogramBuilder Class contains  
@@ -13,7 +13,7 @@
 
 #include "TH1F.h"
 #include "TH2F.h"
-#include "Analysis/hoTriggerAnalyzer/interface/CommonFunctions.h"
+#include "HoMuonTrigger/hoTriggerAnalyzer/interface/CommonFunctions.h"
 
 // Constructor
 /*

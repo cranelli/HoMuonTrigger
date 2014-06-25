@@ -38,7 +38,7 @@
 #include "DataFormats/HcalRecHit/interface/HORecHit.h"
 #include "DataFormats/HLTReco/interface/TriggerObject.h"
 
-#include "Analysis/hoTriggerAnalyzer/interface/HistogramBuilder.h"
+#include "HoMuonTrigger/hoTriggerAnalyzer/interface/HistogramBuilder.h"
 
 #include <vector>
 #include <iostream>
