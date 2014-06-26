@@ -25,20 +25,20 @@ HistogramBuilder::HistogramBuilder(){
  *Counting Histograms
  *Fills the 1 bin.
  */
-void HistogramBuilder::fillCountHistogram(std::string key){                     
+void HistogramBuilder::fillCountHistogram(std::string key, double_t weight){
   if(!_h1Counter.count(key)){                                                   
     _h1Counter[key] = _fileService->make<TH1F>(Form("%s_Count",key.c_str()),    
                                                Form("%s Count",key.c_str()),    
                                                2, 0, 2);
     _h1Counter[key]->GetYaxis()->SetTitle("Counts");
   }                                                                             
-  _h1Counter[key]->Fill(1);                                                     
+  _h1Counter[key]->Fill(1, weight);
 }                                                                               
 
 /*      
  *Trigger Histograms
  */
-void HistogramBuilder::fillTrigHistograms(bool trigDecision,std::string key){ 
+void HistogramBuilder::fillTrigHistograms(bool trigDecision,std::string key, double_t weight){ 
   if(!_h1Trig.count(key)){                                                   
     _h1Trig[key] = _fileService->make<TH1F>(Form("%s_Trig",key.c_str()),     
                                             Form("%s Trigger",key.c_str()),  
@@ -46,22 +46,22 @@ void HistogramBuilder::fillTrigHistograms(bool trigDecision,std::string key){
     SetAxises(_h1Trig[key],"Trigger Decision", "Counts");
   }                                                      
                        
-  _h1Trig[key]->Fill(trigDecision);                                        
+  _h1Trig[key]->Fill(trigDecision, weight);                                        
      
 }
 
 /*      
  *Weight Histograms
  */
-void HistogramBuilder::fillWeightHistograms(float weight,std::string key){ 
+void HistogramBuilder::fillWeightHistograms(float weight_val,std::string key, double_t weight){ 
   if(!_h1Weight.count(key)){                                                   
     _h1Weight[key] = _fileService->make<TH1F>(Form("%s_Weight",key.c_str()),     
-                                            Form("%s Weight",key.c_str()),  
-                                            2, 0, 2);
+					      Form("%s Weight",key.c_str()),  
+					      1000, 0, 1);
     SetAxises(_h1Weight[key],"Weight", "Counts");
   }                                                      
                        
-  _h1Weight[key]->Fill(weight);                                        
+  _h1Weight[key]->Fill(weight_val, weight);                                        
      
 }
       
@@ -70,21 +70,21 @@ void HistogramBuilder::fillWeightHistograms(float weight,std::string key){
  *Energy Histograms
  */
 
-void HistogramBuilder::fillEnergyHistograms(float energy, std::string key){  
+void HistogramBuilder::fillEnergyHistograms(float energy, std::string key, double_t weight){  
   if(!_h1Energy.count(key)){                                             
     _h1Energy[key] = _fileService->make<TH1F>(Form("%s_Energy",key.c_str()),
                                             Form("%s Energy",key.c_str()), 
                                             2100, -5.0, 100.0);
     SetAxises(_h1Energy[key],"Energy (GeV)", "Counts");
   }                                                                          
-  _h1Energy[key]->Fill(energy);                                            
+  _h1Energy[key]->Fill(energy, weight);                                            
 }  
 
 /*                                                                             
  *Eta Phi Histograms                                                         
  */
 
-void HistogramBuilder::fillEtaPhiHistograms(float eta, float phi, std::string key){
+void HistogramBuilder::fillEtaPhiHistograms(float eta, float phi, std::string key, double_t weight){
   if(!_h1Eta.count(key)){
     _h1Eta[key] = _fileService->make<TH1F>(Form("%s_Eta",key.c_str()),
                                            Form("%s Eta",key.c_str()),
@@ -92,7 +92,7 @@ void HistogramBuilder::fillEtaPhiHistograms(float eta, float phi, std::string ke
     SetAxises(_h1Eta[key], "#eta", "Counts");
     
   }
-  _h1Eta[key]->Fill(eta);
+  _h1Eta[key]->Fill(eta, weight);
 
   if(!_h1Phi.count(key)){
     _h1Phi[key] = _fileService->make<TH1F>(Form("%s_Phi",key.c_str()),
@@ -100,7 +100,7 @@ void HistogramBuilder::fillEtaPhiHistograms(float eta, float phi, std::string ke
                                            500, -3.14, 3.14);  //HO has 72 iphis and 30 ietas                         
     SetAxises(_h1Phi[key], "#phi", "Counts");
   }
-  _h1Phi[key]->Fill(phi);
+  _h1Phi[key]->Fill(phi, weight);
 
   if(!_h2EtaPhiMap.count(key)){
     _h2EtaPhiMap[key] = _fileService->make<TH2F>(Form("%s_EtaPhi",key.c_str()),
@@ -108,7 +108,7 @@ void HistogramBuilder::fillEtaPhiHistograms(float eta, float phi, std::string ke
 						 500, -1.5, 1.5, 500, -3.14, 3.14);
     SetAxises(_h2EtaPhiMap[key], "#eta","#phi");
   }
-  _h2EtaPhiMap[key]->Fill(eta, phi);
+  _h2EtaPhiMap[key]->Fill(eta, phi, weight);
 
 };
 
@@ -118,7 +118,7 @@ void HistogramBuilder::fillEtaPhiHistograms(float eta, float phi, std::string ke
 
 void HistogramBuilder::fillDeltaEtaDeltaPhiHistograms(float eta1, float eta2, 
 						      float phi1, float phi2, 
-						      std::string key){
+						      std::string key, double_t weight){
   float deltaEta, deltaPhi;
   CommonFunctions commonFunctions;
   deltaEta = eta1 - eta2;
@@ -133,7 +133,7 @@ void HistogramBuilder::fillDeltaEtaDeltaPhiHistograms(float eta1, float eta2,
 						     2000, -2.6, 2.6);
 	SetAxises(_h1DeltaEta[key],"#Delta #eta", "Counts");
   }
-  _h1DeltaEta[key]->Fill(deltaEta);
+  _h1DeltaEta[key]->Fill(deltaEta, weight);
     
   //Delta Phi Histograms Fill
   if(!_h1DeltaPhi.count(key)){
@@ -144,14 +144,14 @@ void HistogramBuilder::fillDeltaEtaDeltaPhiHistograms(float eta1, float eta2,
                                                 2000, -3.14, 3.14);
     SetAxises(_h1DeltaPhi[key],"#Delta #phi", "Counts");
   }
-  _h1DeltaPhi[key]->Fill(deltaPhi);
+  _h1DeltaPhi[key]->Fill(deltaPhi, weight);
   
   //DeltaEta Delta Phi Histograms Fill
   if(!_h2DeltaEtaDeltaPhi.count(key)){
     _h2DeltaEtaDeltaPhi[key] = _fileService->make<TH2F>(Form("%s_DeltaEtaDeltaPhi",key.c_str()),Form("%s #Delta#eta #Delta#Phi",key.c_str()), 2000, -2.6, 2.6, 2000, -3.14, 3.14);
     SetAxises(_h2DeltaEtaDeltaPhi[key],"#Delta #eta", "#Delta #phi");
   }
-  _h2DeltaEtaDeltaPhi[key]->Fill(deltaEta, deltaPhi);
+  _h2DeltaEtaDeltaPhi[key]->Fill(deltaEta, deltaPhi, weight);
 } 
 
 
@@ -159,15 +159,15 @@ void HistogramBuilder::fillDeltaEtaDeltaPhiHistograms(float eta1, float eta2,
  *Pt Histograms
  *has variable binning
  */
-void HistogramBuilder::fillPtHistograms(float pt, std::string key){
+void HistogramBuilder::fillPtHistograms(float pt, std::string key, double_t weight){
   if(!_h1Pt.count(key)){
         
     _h1Pt[key] = _fileService->make<TH1F>(Form("%s_Pt",key.c_str()),
 					  Form("%s Pt",key.c_str()),
-					  800,0,400);
+					  6000,0,3000);
     SetAxises(_h1Pt[key],"Pt (GeV)", "Counts");
   } 
-  _h1Pt[key]->Fill(pt);
+  _h1Pt[key]->Fill(pt, weight);
 
 if(!_h1InvPt.count(key)){
         
@@ -176,7 +176,7 @@ if(!_h1InvPt.count(key)){
 					  800,-1,1);
     SetAxises(_h1InvPt[key], "#frac{1}{P_t}", "Counts");
   } 
- _h1InvPt[key]->Fill(1.0/pt);
+ _h1InvPt[key]->Fill(1.0/pt, weight);
 }
 
 
@@ -184,10 +184,10 @@ if(!_h1InvPt.count(key)){
  *L1Muon Pt Histograms
  *has variable binning
  */
-void HistogramBuilder::fillL1MuonPtHistograms(float pt, std::string key){
+void HistogramBuilder::fillL1MuonPtHistograms(float pt, std::string key, double_t weight){
   if(!_h1L1MuonPt.count(key)){
     
-    float variableBinArray[] = {0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5,6,7,8,10,12,14,16,18,20,25,30,35,40,45,50,60,70,80,100,120,140,180};
+    float variableBinArray[] = {0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5,6,7,8,9,10,12,14,16,18,20,25,30,35,40,45,50,60,70,80,100,120,140,180};
     
     _h1L1MuonPt[key] = _fileService->make<TH1F>(Form("%s_Pt",key.c_str()),
                                                 Form("%s Pt",key.c_str()),
@@ -195,7 +195,7 @@ void HistogramBuilder::fillL1MuonPtHistograms(float pt, std::string key){
                                                 variableBinArray);
     SetAxises(_h1L1MuonPt[key], "Pt", "Counts");
   } 
-  _h1L1MuonPt[key]->Fill(pt);
+  _h1L1MuonPt[key]->Fill(pt, weight);
 }         
 
 /*

@@ -77,6 +77,7 @@ private:
   
   edm::Service<TFileService> _fileService;
 
+  edm::InputTag _genInfoInput;
   edm::InputTag _genInput;
   edm::InputTag _l1MuonInput;
   //edm::InputTag _stdMuInput;
@@ -85,6 +86,8 @@ private:
   edm::InputTag _hltSumAODInput;
   HistogramBuilder histogramBuilder;
 
+  //Generator Weighting Information
+  double_t weight;
   
   // I would prefer to run without an InputTag, the L1GtUtility should be     
   // able to find it automatically from the Providence information.        

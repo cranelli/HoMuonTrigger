@@ -14,14 +14,14 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source("PoolSource",
     # replace 'myfile.root' with the source file you want to use
     fileNames = cms.untracked.vstring(
-    'file:/data/users/cranelli/HOL1Muon/HOL1Muon_Samples/'
-    'Spring14dr/Muplus_Pt10-gun/GEN-SIM-RECO/'
-    '02CFC825-F2C7-E311-89AC-003048D462DA.root'
+    'file:/afs/cern.ch/work/c/cranelli/'
+    'public/HO_Muon/Samples/'
+    '0009CDC8-CCD6-E311-A9AD-90E6BAE8CC37.root'
 
     #'root://xrootd.unl.edu//store//mc/'
-    #'Fall13dr/QCD_Pt-300to470_Tune4C_13TeV_pythia8/GEN-SIM-RAW/'
-    #'castor_tsg_PU40bx25_POSTLS162_V2-v1/'
-    #'00000/001C52C5-2EA4-E311-AA23-003048678F9C.root'
+    #'Spring14dr/QCD_Pt-15to3000_Tune4C_Flat_13TeV_pythia8/GEN-SIM-RECO/PU20bx25_POSTLS170_V5-v1/'
+    #'00000/0009CDC8-CCD6-E311-A9AD-90E6BAE8CC37.root'
+    
     #'file:/data/users/cranelli/HOL1Muon/HOL1Muon_Samples/'
     #'Fall13dr/QCD_Pt-300to470_Tune4C_13TeV_pythia8/GEN-SIM-RAW/'
     #'RAW_QCD_Pt-300to470_PU40bx25_POSTLS162_V2.root'
@@ -38,7 +38,7 @@ process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
 process.load('Configuration.Geometry.GeometryExtended2015Reco_cff')
 #Global Tag
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-process.GlobalTag.globaltag='PostLS170_V6::All'
+process.GlobalTag.globaltag='PostLS170_V5::All'
 
 #RawToDigi
 #process.load('Configuration.StandardSequences.RawToDigi_cff')
@@ -55,6 +55,7 @@ process.GlobalTag.globaltag='PostLS170_V6::All'
 
 process.demo = cms.EDAnalyzer(
     'hoMuonAnalyzer',
+    genInfoSrc = cms.InputTag("generator"),
     genSrc = cms.InputTag("genParticles"),
     l1MuonSrc=cms.InputTag("l1extraParticles"),
     #stdMuSrc = cms.InputTag("standAloneMuons"),

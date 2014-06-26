@@ -33,15 +33,15 @@ class HistogramBuilder {
    * Functions for HistogramBuilder                                       
    */
   
-  void fillL1MuonPtHistograms(float pt, std::string key);
-  void fillPtHistograms(float pt, std::string key);
-  void fillEnergyHistograms(float energy, std::string key);                   
-  void fillEtaPhiHistograms(float eta, float phi, std::string key);
+  void fillL1MuonPtHistograms(float pt, std::string key, double_t weight=1);
+  void fillPtHistograms(float pt, std::string key, double_t weight=1);
+  void fillEnergyHistograms(float energy, std::string key, double_t weight=1);     
+  void fillEtaPhiHistograms(float eta, float phi, std::string key, double_t weight=1);
   void fillDeltaEtaDeltaPhiHistograms(float eta1, float eta2, 
-				      float phi1, float phi2,  std::string key);
-  void fillCountHistogram(std::string key);                                   
-  void fillTrigHistograms(bool trigDecision,std::string key);
-
+				      float phi1, float phi2,  std::string key, double_t weight=1);
+  void fillCountHistogram(std::string key,double_t weight=1);    
+  void fillTrigHistograms(bool trigDecision,std::string key, double_t weight=1);
+  void fillWeightHistograms(float weight_val, std::string key, double_t weight=1);
   //int getMyNumber(); //{return mynumber;}
 
  private:
@@ -57,6 +57,7 @@ class HistogramBuilder {
   std::map<std::string,TH1F*> _h1DeltaPhi;
   std::map<std::string,TH2F*> _h2DeltaEtaDeltaPhi;
   std::map<std::string,TH1F*> _h1Trig;
+  std::map<std::string,TH1F*> _h1Weight;
   std::map<std::string,TH1F*> _h1Counter; 
   
   /*

@@ -8,6 +8,8 @@
 
 #source /scratch/crab/CRAB_2_10_1/crab.csh
 
-source /scratch/crab/current/crab.csh
+#source /scratch/crab/current/crab.csh
+
+source /afs/cern.ch/cms/ccs/wm/scripts/Crab/crab.sh
 
 voms-proxy-init -voms cms -valid 192:00;

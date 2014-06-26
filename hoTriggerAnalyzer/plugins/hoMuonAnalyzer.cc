@@ -37,6 +37,7 @@
 
 #include "L1Trigger/GlobalTriggerAnalyzer/interface/L1GtUtils.h"
 
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/L1Trigger/interface/L1MuonParticle.h"
 #include "DataFormats/L1Trigger/interface/L1MuonParticleFwd.h"
@@ -74,7 +75,8 @@ hoMuonAnalyzer::hoMuonAnalyzer(const edm::ParameterSet& iConfig){
   //now do what ever initialization is needed
  
   //Get Input Tags from the Configuration
-  
+
+  _genInfoInput = iConfig.getParameter<edm::InputTag>("genInfoSrc");
   _genInput = iConfig.getParameter<edm::InputTag>("genSrc");
   _l1MuonInput = iConfig.getParameter<edm::InputTag>("l1MuonSrc");
   _horecoInput = iConfig.getParameter<edm::InputTag>("horecoSrc");
@@ -112,7 +114,6 @@ hoMuonAnalyzer::~hoMuonAnalyzer()
   
 }
 
-
 //
 // member functions
 //
@@ -127,6 +128,9 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
    /*
     * Get Event Data and Event Setup
     */
+
+   Handle<GenEventInfoProduct> genEventInfo;
+   iEvent.getByLabel(_genInfoInput, genEventInfo);
 
    Handle<reco::GenParticleCollection> truthParticles;
    iEvent.getByLabel(_genInput,truthParticles);
@@ -149,7 +153,7 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
    const TriggerNames & names = iEvent.triggerNames(*hltTriggerResults);
    //cout << "Number of names " << names.size() << endl;
    
-   //For first Event List Triggers
+   //List Triggers in Event
    /*
       for(int i =0; i < (int) names.size(); i++){
      cout << names.triggerName(i) << endl;
@@ -188,8 +192,24 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
     *
     */
 
-   histogramBuilder.fillCountHistogram("Events");
+   histogramBuilder.fillCountHistogram("Events",weight);
      
+   /*
+    * Generator Weight Information
+    */
+
+   string genEventInfo_key = "GenEventInfo";
+   string genEventInfoNoWeight_key = "GenEventInfo_NoWeight";
+   weight = genEventInfo->weight();
+   //cout << "Event Generator Weight: " << weight << endl;
+   histogramBuilder.fillWeightHistograms(weight, genEventInfo_key, weight);
+   
+   
+   float qScale = genEventInfo->qScale();
+   //cout << "Event Generator Qscale" << qScale << endl;
+   histogramBuilder.fillPtHistograms(qScale,genEventInfo_key,weight);
+   histogramBuilder.fillPtHistograms(qScale,genEventInfoNoWeight_key, weight);
+   
 
    /*
     * Level 1 Muons
@@ -201,10 +221,11 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
    auto el1Muon = l1Muons->cend();
 
    for( ; bl1Muon != el1Muon; ++bl1Muon ) {
-     histogramBuilder.fillCountHistogram(l1muon_key);
-     histogramBuilder.fillL1MuonPtHistograms(bl1Muon->pt(), l1muon_key);
+     histogramBuilder.fillCountHistogram(l1muon_key, weight);
+     histogramBuilder.fillL1MuonPtHistograms(bl1Muon->pt(),
+					     l1muon_key, weight);
      histogramBuilder.fillEtaPhiHistograms(bl1Muon->eta(), bl1Muon->phi(), 
-					   l1muon_key);
+					   l1muon_key, weight);
      //fillEtaPhiHistograms(bl1Muon->eta(), bl1Muon->phi(), l1muon_key);
      //For variable binning
      listL1MuonPt.push_back(bl1Muon->pt());
@@ -220,12 +241,11 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
 
    for( ; bl1MuonB != l1Muons->cend(); ++bl1MuonB ) {
      if(abs(bl1MuonB->eta())>barrel_eta) continue;  // Only want L1 Muons in the Barrel
-     histogramBuilder.fillCountHistogram(l1muonB_key);
-     histogramBuilder.fillL1MuonPtHistograms(bl1MuonB->pt(), l1muonB_key);
+     histogramBuilder.fillCountHistogram(l1muonB_key,weight);
+     histogramBuilder.fillL1MuonPtHistograms(bl1MuonB->pt(), l1muonB_key, weight);
      histogramBuilder.fillEtaPhiHistograms(bl1MuonB->eta(), bl1MuonB->phi(), 
-					   l1muonB_key);
+					   l1muonB_key, weight);
    }
-
 
    /*
     * HLT Triggers
@@ -241,9 +261,10 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
      string hltName = bHLTNames->second;
      for(int hltNameIndex =0; hltNameIndex < (int) names.size(); hltNameIndex++){
        if(names.triggerName(hltNameIndex)==hltName){
-	 histogramBuilder.fillTrigHistograms(hltTriggerResults->accept(hltNameIndex), hlt_key);
+	 histogramBuilder.fillTrigHistograms(hltTriggerResults->accept(hltNameIndex),
+					     hlt_key, weight);
 	 if(hltTriggerResults->accept(hltNameIndex)){
-	   histogramBuilder.fillCountHistogram(hlt_key);
+	   histogramBuilder.fillCountHistogram(hlt_key, weight);
 	 }
        }
      }
@@ -309,9 +330,9 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
 	
        histogramBuilder.fillEtaPhiHistograms(bTriggerObject->eta(),
 					     bTriggerObject->phi(),
-					     hlt_key);
+					     hlt_key, weight);
        histogramBuilder.fillPtHistograms(bTriggerObject->pt(),
-					 hlt_key);
+					 hlt_key, weight);
 
        //Barrel HLT Trigger Objects
        if(abs(bTriggerObject->eta())<barrel_eta){
@@ -321,9 +342,9 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
 	 //cout << hlt_Barrel_key << endl;
 	 histogramBuilder.fillEtaPhiHistograms(bTriggerObject->eta(),
 					       bTriggerObject->phi(),
-					       hlt_Barrel_key);
+					       hlt_Barrel_key, weight);
 	 histogramBuilder.fillPtHistograms(bTriggerObject->pt(),
-					   hlt_Barrel_key);
+					   hlt_Barrel_key, weight);
        }
      }
    }
@@ -359,18 +380,18 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
    //cout << hoRecoHits.size() << endl;
    auto bho_reco = hoRecoHits->begin();
    auto eho_reco = hoRecoHits->end();
-   histogramBuilder.fillCountHistogram(horeco_key);
+   histogramBuilder.fillCountHistogram(horeco_key, weight);
    for(; bho_reco != eho_reco; ++bho_reco){
      //cout << caloGeo->getPosition(bho_reco->id()).eta() << endl;
      
      //h1HORecoEnergy->HistogramBuilder.Fill( bho_reco->energy());
 
-     histogramBuilder.fillEnergyHistograms(bho_reco->energy(), horeco_key);
+     histogramBuilder.fillEnergyHistograms(bho_reco->energy(), horeco_key, weight);
 
      float ho_eta, ho_phi;
      ho_eta = caloGeo->getPosition(bho_reco->id()).eta();
      ho_phi = caloGeo->getPosition(bho_reco->id()).phi();
-     histogramBuilder.fillEtaPhiHistograms(ho_eta, ho_phi, horeco_key);
+     histogramBuilder.fillEtaPhiHistograms(ho_eta, ho_phi, horeco_key, weight);
    }
 
 
@@ -384,9 +405,9 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
    //cout << "Error Code: " << iErrorCode << " and Trigger Decision: " << trigDecision << endl;
    
    if(iErrorCode == 0){
-     histogramBuilder.fillTrigHistograms(trigDecision,m_nameAlgTechTrig);
+     histogramBuilder.fillTrigHistograms(trigDecision,m_nameAlgTechTrig, weight);
      if(trigDecision){
-       histogramBuilder.fillCountHistogram(m_nameAlgTechTrig);
+       histogramBuilder.fillCountHistogram(m_nameAlgTechTrig, weight);
      }  
      
    } else if (iErrorCode == 1) {
@@ -438,13 +459,13 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
    auto eho_recoT = hoRecoHitsAboveThreshold.end();
    
    for(; bho_recoT != eho_recoT; ++bho_recoT){
-     histogramBuilder.fillCountHistogram(horecoT_key);
-     histogramBuilder.fillEnergyHistograms(bho_recoT->energy(), horecoT_key);
+     histogramBuilder.fillCountHistogram(horecoT_key, weight);
+     histogramBuilder.fillEnergyHistograms(bho_recoT->energy(), horecoT_key, weight);
 
      float hoT_eta, hoT_phi;
      hoT_eta = caloGeo->getPosition(bho_recoT->id()).eta();
      hoT_phi = caloGeo->getPosition(bho_recoT->id()).phi();
-     histogramBuilder.fillEtaPhiHistograms(hoT_eta, hoT_phi, horecoT_key);
+     histogramBuilder.fillEtaPhiHistograms(hoT_eta, hoT_phi, horecoT_key, weight);
    }
 
    /*
@@ -477,21 +498,23 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
        string l1MuonBhoReco_key = "L1MuonBarrelandHOReco";
        histogramBuilder.fillDeltaEtaDeltaPhiHistograms(l1MuonB_eta, horeco_eta,
 						       l1MuonB_phi, horeco_phi,
-						       l1MuonBhoReco_key);
+						       l1MuonBhoReco_key, weight);
 
        //Make the Mip Match
        if(isInsideRCut(deltaRMip_Max, l1MuonB_eta, horeco_eta, l1MuonB_phi, horeco_phi)){
 	 mipMatch=true; //Only need a single match
 	 //NB It is possible for there to be more than one matched Mip.
 	 string hoRecoMipMatch_key = "HORecowithMipMatch_All";
-	 histogramBuilder.fillCountHistogram(hoRecoMipMatch_key);
-	 histogramBuilder.fillEtaPhiHistograms(horeco_eta, horeco_phi, hoRecoMipMatch_key);
-	 histogramBuilder.fillEnergyHistograms(bho_recoT->energy(),hoRecoMipMatch_key);
+	 histogramBuilder.fillCountHistogram(hoRecoMipMatch_key, weight);
+	 histogramBuilder.fillEtaPhiHistograms(horeco_eta, horeco_phi, 
+					       hoRecoMipMatch_key,weight);
+	 histogramBuilder.fillEnergyHistograms(bho_recoT->energy(),hoRecoMipMatch_key, weight);
 	
 	 string l1MuonBhoRecoMatch_key = "L1MuonBarrelandHORecowithMipMatch_All";
 	 histogramBuilder.fillDeltaEtaDeltaPhiHistograms(l1MuonB_eta,horeco_eta,
 							 l1MuonB_phi, horeco_phi,
-							 l1MuonBhoRecoMatch_key);
+							 l1MuonBhoRecoMatch_key,
+							 weight);
        }
      }
 	 
@@ -499,9 +522,10 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
        //Store L1 Muons with Mips
        l1MuonsBarrelWithMip.push_back(bl1MuonB);
        //Make Histograms
-       histogramBuilder.fillCountHistogram(l1MuonBMipMatch_key);
-       histogramBuilder.fillL1MuonPtHistograms(bl1MuonB.pt(), l1MuonBMipMatch_key);
-       histogramBuilder.fillEtaPhiHistograms(l1MuonB_eta, l1MuonB_phi, l1MuonBMipMatch_key);
+       histogramBuilder.fillCountHistogram(l1MuonBMipMatch_key, weight);
+       histogramBuilder.fillL1MuonPtHistograms(bl1MuonB.pt(), l1MuonBMipMatch_key,weight);
+       histogramBuilder.fillEtaPhiHistograms(l1MuonB_eta, l1MuonB_phi,
+					     l1MuonBMipMatch_key, weight);
      }
    }
    //cout << "Number of L1 Muons with Mips: " << l1MuonsWithMip.size() << endl;
@@ -530,29 +554,31 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
        string l1MuonBhltMuon_key = "L1MuonBarrelandHLTMuon";
        histogramBuilder.fillDeltaEtaDeltaPhiHistograms(l1MuonB_eta, hltMuon_eta,
 						       l1MuonB_phi, hltMuon_phi,
-						       l1MuonBhltMuon_key);
+						       l1MuonBhltMuon_key, weight);
        if(isInsideRCut(deltaRHLT_Max,l1MuonB_eta, hltMuon_eta, l1MuonB_phi, hltMuon_phi)){
 	 hltMatch=true; //Only need a single match
 	 //NB It is possible for there to be more than one matched hlt.
 	 string hltMuonhltMatch_key = "HltMuonwithHLTMatch_All";
-	 histogramBuilder.fillCountHistogram(hltMuonhltMatch_key);
+	 histogramBuilder.fillCountHistogram(hltMuonhltMatch_key, weight);
 	 histogramBuilder.fillEtaPhiHistograms(hltMuon_eta,
 					       hltMuon_phi,
-					       hltMuonhltMatch_key);
-	 histogramBuilder.fillPtHistograms(bhltMuon->pt(),hltMuonhltMatch_key);
+					       hltMuonhltMatch_key, weight);
+	 histogramBuilder.fillPtHistograms(bhltMuon->pt(),hltMuonhltMatch_key, weight);
        
 	 string l1MuonBhltMuonHltMatch_key = "L1MuonBarrelandHLTMuonwithHltMatch_All";
 	 histogramBuilder.fillDeltaEtaDeltaPhiHistograms(l1MuonB_eta,hltMuon_eta,
 							 l1MuonB_phi, hltMuon_phi,
-							 l1MuonBhltMuonHltMatch_key);
+							 l1MuonBhltMuonHltMatch_key,
+							 weight);
        }
      }
      
      if(hltMatch){
        string l1MuonBHltMatch_key = "L1MuonBarrelwithHLTMatch";
-       histogramBuilder.fillCountHistogram(l1MuonBHltMatch_key);
-       histogramBuilder.fillL1MuonPtHistograms(bl1MuonB->pt(), l1MuonBHltMatch_key);
-       histogramBuilder.fillEtaPhiHistograms(bl1MuonB->eta(), bl1MuonB->phi(), l1MuonBHltMatch_key);
+       histogramBuilder.fillCountHistogram(l1MuonBHltMatch_key, weight);
+       histogramBuilder.fillL1MuonPtHistograms(bl1MuonB->pt(), l1MuonBHltMatch_key, weight);
+       histogramBuilder.fillEtaPhiHistograms(bl1MuonB->eta(), bl1MuonB->phi(), 
+					     l1MuonBHltMatch_key, weight);
        
      }
    }
@@ -583,29 +609,32 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
        string l1MuonBwMiphltMuon_key = "L1MuonBarrelMipandHLTMuon";
        histogramBuilder.fillDeltaEtaDeltaPhiHistograms(l1MuonBwMip_eta, hltMuon_eta,
 						       l1MuonBwMip_phi, hltMuon_phi,
-						       l1MuonBwMiphltMuon_key);
+						       l1MuonBwMiphltMuon_key, weight);
        if(isInsideRCut(deltaRHLT_Max,l1MuonBwMip_eta, hltMuon_eta, l1MuonBwMip_phi, hltMuon_phi)){
 	 hltMatch=true; //Only need a single match
 	 //NB It is possible for there to be more than one matched hlt.
 	 string hltMuonhltMatchwMip_key = "HltMuonwithHLTMatchwithL1BarrelMip_All";
-	 histogramBuilder.fillCountHistogram(hltMuonhltMatchwMip_key);
+	 histogramBuilder.fillCountHistogram(hltMuonhltMatchwMip_key, weight);
 	 histogramBuilder.fillEtaPhiHistograms(hltMuon_eta,
 					       hltMuon_phi,
-					       hltMuonhltMatchwMip_key);
-	 histogramBuilder.fillPtHistograms(bhltMuon->pt(),hltMuonhltMatchwMip_key);
+					       hltMuonhltMatchwMip_key, weight);
+	 histogramBuilder.fillPtHistograms(bhltMuon->pt(),hltMuonhltMatchwMip_key, weight);
        
 	 string l1MuonBwMiphltMuonMatch_key = "L1MuonBarrelMipandHLTMuonwithHltMatch_All";
 	 histogramBuilder.fillDeltaEtaDeltaPhiHistograms(l1MuonBwMip_eta,hltMuon_eta,
 							 l1MuonBwMip_phi, hltMuon_phi,
-							 l1MuonBwMiphltMuonMatch_key);
+							 l1MuonBwMiphltMuonMatch_key,
+							 weight);
        }
      }
      
      if(hltMatch){
        string l1MuonBwMipHltMatch_key = "L1MuonBarrelwithMipHLTMatch";
-       histogramBuilder.fillCountHistogram(l1MuonBwMipHltMatch_key);
-       histogramBuilder.fillL1MuonPtHistograms(bl1MuonBwMip->pt(), l1MuonBwMipHltMatch_key);
-       histogramBuilder.fillEtaPhiHistograms(l1MuonBwMip_eta, l1MuonBwMip_phi, l1MuonBwMipHltMatch_key);
+       histogramBuilder.fillCountHistogram(l1MuonBwMipHltMatch_key, weight);
+       histogramBuilder.fillL1MuonPtHistograms(bl1MuonBwMip->pt(), l1MuonBwMipHltMatch_key,
+					       weight);
+       histogramBuilder.fillEtaPhiHistograms(l1MuonBwMip_eta, l1MuonBwMip_phi, 
+					     l1MuonBwMipHltMatch_key, weight);
        
      }
    }
