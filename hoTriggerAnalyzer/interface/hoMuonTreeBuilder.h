@@ -32,6 +32,7 @@
 #include "L1Trigger/GlobalTriggerAnalyzer/interface/L1GtUtils.h"
 //#include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/L1Trigger/interface/L1MuonParticle.h"
@@ -103,6 +104,7 @@ class hoMuonTreeBuilder : public edm::EDAnalyzer {
   
   edm::Service<TFileService> _fileService;
 
+  edm::InputTag _genInfoInput;
   edm::InputTag _genInput;
   edm::InputTag _l1MuonInput;
   //edm::InputTag _stdMuInput;
@@ -140,14 +142,17 @@ class hoMuonTreeBuilder : public edm::EDAnalyzer {
   //Tree Variables
   TTree *ho_muon_tree;
   void initializeBranches();
+  void fillGeneratorWeights(edm::Handle<GenEventInfoProduct> & genEventInfo);
   void fillGeneratorParticles(edm::Handle<reco::GenParticleCollection> & truthParticles);
   void fillL1Muons(edm::Handle<l1extra::L1MuonParticleCollection> & l1Muons);
   void fillHORecHits(edm::Handle<HORecHitCollection> &hoRecoHits,
 		     edm::ESHandle<CaloGeometry> & caloGeo);
   void fillHLTTrigObjects(edm::Handle<trigger::TriggerEvent> triggerSummary,
 			  string hlt_key, edm::InputTag lastFilterTag);
+  
     
-  //Generator Particle Information
+  //Particle Information
+  double weight;
   basic_Generator generator;
   basic_TrigObject l1muon;
   basic_HORecHit horeco;
