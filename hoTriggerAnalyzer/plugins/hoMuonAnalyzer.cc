@@ -192,7 +192,6 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
     *
     */
 
-   histogramBuilder.fillCountHistogram("Events",weight);
      
    /*
     * Generator Weight Information
@@ -210,6 +209,12 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
    histogramBuilder.fillPtHistograms(qScale,genEventInfo_key,weight);
    histogramBuilder.fillPtHistograms(qScale,genEventInfoNoWeight_key, weight);
    
+
+   /*
+    * Event Count
+    */
+
+   histogramBuilder.fillCountHistogram("Events",weight);
 
    /*
     * Level 1 Muons

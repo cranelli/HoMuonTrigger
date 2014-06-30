@@ -75,6 +75,7 @@ hoMuonTreeBuilder::hoMuonTreeBuilder(const edm::ParameterSet& iConfig){
 
   //Get Input Tags from the Configuration
   
+  _genInfoInput = iConfig.getParameter<edm::InputTag>("genInfoSrc");
   _genInput = iConfig.getParameter<edm::InputTag>("genSrc");
   _l1MuonInput = iConfig.getParameter<edm::InputTag>("l1MuonSrc");
   _horecoInput = iConfig.getParameter<edm::InputTag>("horecoSrc");
@@ -126,6 +127,9 @@ hoMuonTreeBuilder::analyze(const edm::Event& iEvent,
     * Get Event Data and Event Setup
     */
 
+   Handle<GenEventInfoProduct> genEventInfo;
+   iEvent.getByLabel(_genInfoInput, genEventInfo);
+
    Handle<reco::GenParticleCollection> genParticles;
    iEvent.getByLabel(_genInput,genParticles);
 
@@ -162,6 +166,7 @@ hoMuonTreeBuilder::analyze(const edm::Event& iEvent,
    
 
 
+   fillGeneratorWeights(genEventInfo);
    fillGeneratorParticles(genParticles);
    fillL1Muons(l1Muons);
    fillHORecHits(hoRecoHits, caloGeo);
@@ -286,6 +291,7 @@ void hoMuonTreeBuilder::defineTriggersOfInterest(){
    * HLT Triggers
    */
   
+  
   basic_TrigObject hltIsoMu24;
   string hltIsoMu24_key = "hltIsoMu24";
   hltNamesOfInterest.insert(pair<string, string>(hltIsoMu24_key,"HLT_IsoMu24_v18"));
@@ -295,6 +301,7 @@ void hoMuonTreeBuilder::defineTriggersOfInterest(){
 									"","HLT")));
 
   mapHLTObjects.insert(pair<string,basic_TrigObject>(hltIsoMu24_key, hltIsoMu24));
+  
 
   basic_TrigObject hltMu5;
   string hltMu5_key = "hltMu5";
@@ -304,6 +311,11 @@ void hoMuonTreeBuilder::defineTriggersOfInterest(){
 									"","HLT")));
   mapHLTObjects.insert(pair<string,basic_TrigObject>(hltMu5_key, hltMu5));
 }
+
+void hoMuonTreeBuilder::fillGeneratorWeights(edm::Handle<GenEventInfoProduct> & genEventInfo){
+  weight = genEventInfo->weight();
+}
+
 
 void hoMuonTreeBuilder::fillGeneratorParticles(edm::Handle<reco::GenParticleCollection>
 					       & genParticles){
@@ -381,6 +393,11 @@ void hoMuonTreeBuilder::fillHLTTrigObjects(edm::Handle<trigger::TriggerEvent> tr
 
 
 void hoMuonTreeBuilder::initializeBranches(){
+ 
+  //Generator Weights
+
+  ho_muon_tree->Branch("Generator_Weights", &weight); 
+
   //Generator
   ho_muon_tree->Branch("Generator_pdgIds",
                        "std::vector<int>",&generator.pdgIds);

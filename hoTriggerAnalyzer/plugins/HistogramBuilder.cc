@@ -187,11 +187,11 @@ if(!_h1InvPt.count(key)){
 void HistogramBuilder::fillL1MuonPtHistograms(float pt, std::string key, double_t weight){
   if(!_h1L1MuonPt.count(key)){
     
-    float variableBinArray[] = {0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5,6,7,8,9,10,12,14,16,18,20,25,30,35,40,45,50,60,70,80,100,120,140,180};
+    float variableBinArray[] = {0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5,6,7,8,10,12,14,16,18,20,25,30,35,40,45,50,60,70,80,100,120,140,180};
     
     _h1L1MuonPt[key] = _fileService->make<TH1F>(Form("%s_Pt",key.c_str()),
                                                 Form("%s Pt",key.c_str()),
-                                                33,
+                                                32,
                                                 variableBinArray);
     SetAxises(_h1L1MuonPt[key], "Pt", "Counts");
   } 
