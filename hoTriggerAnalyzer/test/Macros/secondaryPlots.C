@@ -7,8 +7,12 @@
 //#include "TObject.h"
 //#include "TList.h"
 
-const char* fileDir = "/data/users/cranelli/HOL1Muon/HOL1Muon_Histograms/QCD/Version_1_3/";
-const char* ptHat = "WeightedMerger"; 
+
+const char* fileDir = "/data/users/cranelli/HOL1Muon/HOL1Muon_Histograms/QCD_Flat/Version_2_3/";
+const char* ptHat = "";
+
+//const char* fileDir = "/data/users/cranelli/HOL1Muon/HOL1Muon_Histograms/QCD/Version_1_3/";
+//#const char* ptHat = "WeightedMerger"; 
 //"/home/cranelli/HO_Muon/Fall13/RAW/CMSSW_6_2_9/src/Analysis/hoTriggerAnalyzer/test/";
 const char* fileName="L1MuonHistogram.root";
 const char* newFileName = "L1MuonHistogram_Plus.root";
@@ -34,11 +38,18 @@ void secondaryPlots(){
 
 
   // Normal L1 Muon Barrel_Pt
-  TH1F* h1Norm = divideByBinWidth("L1MuonBarrel_Pt");
-  SetAxises(h1Norm, "Pt", "dN/dx");
+  TH1F* h1L1Norm = divideByBinWidth("L1MuonBarrel_Pt");
+  SetAxises(h1L1Norm, "Pt", "dN/dx");
   //h1Norm->Draw("HIST");
-  h1Norm->Write();
+  h1L1Norm->Write();
 
+  TH1F* h1L1MipNorm = divideByBinWidth("L1MuonBarrelwithMipMatch_Pt");
+  SetAxises(h1L1MipNorm, "Pt", "dN/dx");
+  h1L1MipNorm->Write();
+
+  TH1F* h1L1HLTNorm = divideByBinWidth("L1MuonBarrelwithHLTMatch_Pt");
+  SetAxises(h1L1HLTNorm, "Pt", "dN/dx");
+  h1L1HLTNorm->Write();
 
   
   //Signal 
@@ -69,14 +80,15 @@ TH1F* divideByBinWidth(char * histName){
   std::stringstream histLoc, normName;
   histLoc <<histDir << histName;
   TH1F* h1 = inFile->Get(histLoc.str().c_str());
-    
+  
   normName << histName <<"_Norm";
-  //h1->Sumw2;
+  
   TH1F* h1Norm = (TH1F*) h1->Clone(normName.str().c_str());
   h1Norm->Reset();
   h1Norm->SetTitle(normName.str().c_str());
   h1Norm->GetYaxis()->SetTitle("#frac{dN}{dx}");
 
+  h1->Sumw2();
   int num_bins = (int) h1Norm->GetNbinsX();
   for(int i=0; i<=num_bins; i++){
     float binContent = h1->GetBinContent(i);
@@ -129,7 +141,9 @@ void divide(TH1F* h1Num, TH1F* h1Den, char *quotientName)
   h1Div->SetTitle(quotientName);
   h1Div->GetYaxis()->SetTitle(quotientName);
   
-  h1Div->Sumw2();
+  //h1Div->Sumw2()
+  h1Num->Sumw2();
+  h1Den->Sumw2();
   h1Div->Divide(h1Num, h1Den);
     
   cout << "Binomial Errors" << endl;
