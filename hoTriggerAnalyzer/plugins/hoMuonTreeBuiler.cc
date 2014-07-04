@@ -52,7 +52,14 @@
 
 #include "Geometry/CaloGeometry/interface/CaloGeometry.h"
 #include "Geometry/Records/interface/CaloGeometryRecord.h"
+#include "MagneticField/Engine/interface/MagneticField.h"
+#include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
+#include "TrackPropagation/SteppingHelixPropagator/interface/SteppingHelixPropagator.h"
+#include "TrackingTools/Records/interface/TrackingComponentsRecord.h"
 //#include "DataFormats/HcalDetId/interface/HcalDetId.h"
+
+#include "DataFormats/GeometrySurface/interface/Cylinder.h"
+#include "TrackingTools/TrajectoryState/interface/TrajectoryStateOnSurface.h"
 
 #include "HoMuonTrigger/hoTriggerAnalyzer/interface/HistogramBuilder.h"
 #include "HoMuonTrigger/hoTriggerAnalyzer/interface/CommonFunctions.h"
@@ -152,7 +159,13 @@ hoMuonTreeBuilder::analyze(const edm::Event& iEvent,
    
    ESHandle<CaloGeometry> caloGeo;
    iSetup.get<CaloGeometryRecord>().get(caloGeo);
-
+   
+   ESHandle<MagneticField> bField;
+   iSetup.get<IdealMagneticFieldRecord>().get(bField);
+   
+   ESHandle<Propagator> shProp;
+   iSetup.get<TrackingComponentsRecord>().
+     get("SteppingHelixPropagatorAlong", shProp);
 
    /*
     * Set Up Level 1 Global Trigger Utility
@@ -164,8 +177,6 @@ hoMuonTreeBuilder::analyze(const edm::Event& iEvent,
    m_l1GtUtils.getL1GtRunCache(iEvent, iSetup, useL1EventSetup, 
 			       useL1GtTriggerMenuLite);
    
-
-
    fillGeneratorWeights(genEventInfo);
    fillGeneratorParticles(genParticles);
    fillL1Muons(l1Muons);
@@ -175,6 +186,9 @@ hoMuonTreeBuilder::analyze(const edm::Event& iEvent,
    for(; bHLTFilters != hltFiltersOfInterest.end(); ++bHLTFilters){
      fillHLTTrigObjects(triggerSummary, bHLTFilters->first, bHLTFilters->second);
    }
+   
+   fillGenMuonPropParticles(genParticles, bField,shProp);
+   fillHLTPropObjects(triggerSummary, bField, shProp);
    
    ho_muon_tree->Fill();
 }
@@ -291,7 +305,7 @@ void hoMuonTreeBuilder::defineTriggersOfInterest(){
    * HLT Triggers
    */
   
-  
+  /*
   basic_TrigObject hltIsoMu24;
   string hltIsoMu24_key = "hltIsoMu24";
   hltNamesOfInterest.insert(pair<string, string>(hltIsoMu24_key,"HLT_IsoMu24_v18"));
@@ -301,7 +315,7 @@ void hoMuonTreeBuilder::defineTriggersOfInterest(){
 									"","HLT")));
 
   mapHLTObjects.insert(pair<string,basic_TrigObject>(hltIsoMu24_key, hltIsoMu24));
-  
+  */
 
   basic_TrigObject hltMu5;
   string hltMu5_key = "hltMu5";
@@ -325,7 +339,7 @@ void hoMuonTreeBuilder::fillGeneratorParticles(edm::Handle<reco::GenParticleColl
   generator.pts->clear();
   
   auto bgen = genParticles->begin();
-  
+
   for( ; bgen != genParticles->end(); ++bgen ) {
     generator.pdgIds->push_back(bgen->pdgId());
     generator.etas->push_back(bgen->eta());
@@ -333,6 +347,139 @@ void hoMuonTreeBuilder::fillGeneratorParticles(edm::Handle<reco::GenParticleColl
     generator.pts->push_back(bgen->pt());
   }
 }
+
+/*
+ * Wrapper for fillGenMuonPropParticles. Sets the radius of the cylinder propagated to,
+ * and selects matching basic_Generator struct.
+ */
+
+void hoMuonTreeBuilder::fillGenMuonPropParticles(edm::Handle<reco::GenParticleCollection> & genParticles,
+					     edm::ESHandle<MagneticField> & bField,
+					     edm::ESHandle<Propagator> & shProp){
+  //For the HO
+  fillGenMuonPropParticles(ho_radius, &genMuonPropToHO, genParticles, bField, shProp);
+
+  //For the RPC
+  fillGenMuonPropParticles(rpc1_radius, &genMuonPropToRPC1, genParticles, bField, shProp);
+}
+
+/*
+ * Propagates particle from the initial Free Trajectory State, to a cylindrical surface
+ * at the position of the subdetector of interest.
+ */
+
+void hoMuonTreeBuilder::fillGenMuonPropParticles(double radius, basic_Generator* genMuonProp, 
+						 edm::Handle<reco::GenParticleCollection> & genParticles,
+						 edm::ESHandle<MagneticField> & bField,
+						 edm::ESHandle<Propagator> & shProp){
+  genMuonProp->pdgIds->clear();
+  genMuonProp->pts->clear();
+  genMuonProp->etas->clear();
+  genMuonProp->phis->clear();
+
+  auto bgen = genParticles->begin();  
+  for( ; bgen != genParticles->end(); ++bgen) {
+    //Select only muons (either sign)
+    if(abs(bgen->pdgId())==13){
+      FreeTrajectoryState initial(GlobalPoint(bgen->vx(), 
+					      bgen->vy(),
+					      bgen->vz()),
+				  GlobalVector(bgen->px(),
+					       bgen->py(),
+					       bgen->pz()),
+				  bgen->charge(),
+				  &*bField); //Initial State holds Magnetic Field Information
+      
+      TrajectoryStateOnSurface final = propagateToCylinder(initial, radius, shProp);
+      if(final.isValid()){
+	//pdgId from generator object, position and momentum are propagated.
+	genMuonProp->pdgIds->push_back(bgen->pdgId());
+	genMuonProp->pts->push_back(final.globalMomentum().transverse()); 
+	genMuonProp->etas->push_back(final.globalPosition().eta());
+	genMuonProp->phis->push_back(final.globalPosition().phi());
+      }
+    }
+  }
+}
+
+
+
+
+/*
+ * Wrapper for fillHLTPropObjects. Sets the radius of the cylinder propagated to,
+ * and selects matching basic_TriggerObject struct.
+ */
+
+void hoMuonTreeBuilder::fillHLTPropObjects(edm::Handle<trigger::TriggerEvent> & triggerSummary,
+					   edm::ESHandle<MagneticField> & bField,
+					   edm::ESHandle<Propagator> & shProp){
+
+  //For the RPC
+  fillHLTPropObjects(rpc1_radius, &hltPropToRPC1, triggerSummary, bField, shProp);
+}
+
+// To start with, I am only propagating hltMu5
+
+void hoMuonTreeBuilder::fillHLTPropObjects(double radius, basic_TrigObject* hltProp,
+			edm::Handle<trigger::TriggerEvent> & triggerSummary,
+			edm::ESHandle<MagneticField> & bField,
+			edm::ESHandle<Propagator> & shProp){
+  
+  hltProp->etas->clear();
+  hltProp->phis->clear();
+  hltProp->pts->clear();
+  
+  //Get TriggerObjectCollection
+  trigger::TriggerObjectCollection hltObjectCollection = triggerSummary->getObjects();
+  
+  //find the filter index 
+  edm::InputTag lastFilterTag = hltFiltersOfInterest["hltMu5"];
+  size_t filterIndex = triggerSummary->filterIndex(lastFilterTag); 
+  
+  if(filterIndex < triggerSummary->sizeFilters()){  //Check that Filter is in Trigger Summary     
+    const trigger::Keys &filterKeys = triggerSummary->filterKeys(filterIndex);
+    for(size_t j=0; j < filterKeys.size(); j++){
+      
+      //Get Trigger Object using Keys
+      
+      //set charge with particle id
+      int trigObjId =  hltObjectCollection[filterKeys[j]].id();
+      int charge = -1; //for muon  
+      if(trigObjId == -13) charge = 1; // for anti-muon
+
+      //Set inital trajectory state
+      FreeTrajectoryState initial(GlobalPoint(0,0,0), //Start at vertex 
+				  GlobalVector(hltObjectCollection[filterKeys[j]].px(),
+					       hltObjectCollection[filterKeys[j]].py(),
+					       hltObjectCollection[filterKeys[j]].pz()),
+				  charge,
+				  &*bField);
+      TrajectoryStateOnSurface final = propagateToCylinder(initial, radius, shProp);
+      if(final.isValid()){
+	//pdgId from generator object, position and momentum are propagated.
+	hltProp->pts->push_back(final.globalMomentum().transverse()); 
+	hltProp->etas->push_back(final.globalPosition().eta());
+	hltProp->phis->push_back(final.globalPosition().phi());
+      }
+    }
+  }
+}
+
+
+TrajectoryStateOnSurface hoMuonTreeBuilder::propagateToCylinder(FreeTrajectoryState & initial, double radius,
+								edm::ESHandle<Propagator> & shProp){
+  
+  Cylinder::PositionType pos0;
+  Cylinder::RotationType rot0;
+  Cylinder::CylinderPointer _Cyl;
+  _Cyl = Cylinder::build(radius, pos0, rot0);
+  
+  //Propagate with Stepping Helix Propagator
+  TrajectoryStateOnSurface final = shProp->propagate(initial, *_Cyl);
+  return final;
+}
+
+
 
 void hoMuonTreeBuilder::fillL1Muons(edm::Handle<l1extra::L1MuonParticleCollection> & l1Muons){
   l1muon.etas->clear();
@@ -388,7 +535,6 @@ void hoMuonTreeBuilder::fillHLTTrigObjects(edm::Handle<trigger::TriggerEvent> tr
       mapHLTObjects[key].pts->push_back(hltObjectCollection[filterKeys[j]].pt());
     }
   }
-
 }
 
 
@@ -407,6 +553,27 @@ void hoMuonTreeBuilder::initializeBranches(){
                        "std::vector<Float_t>",&generator.phis);
   ho_muon_tree->Branch("Generator_Pts",
                        "std::vector<Float_t>",&generator.pts);
+  
+  //Generator Muons Propagated To HO
+  ho_muon_tree->Branch("GenMuonPropToHO_pdgIds",
+		       "std::vector<int>",&genMuonPropToHO.pdgIds);
+  ho_muon_tree->Branch("GenMuonPropToHO_Etas",
+                       "std::vector<Float_t>",&genMuonPropToHO.etas);
+  ho_muon_tree->Branch("GenMuonPropToHO_Phis",
+                       "std::vector<Float_t>",&genMuonPropToHO.phis);
+  ho_muon_tree->Branch("GenMuonPropToHO_Pts",
+                       "std::vector<Float_t>",&genMuonPropToHO.pts);
+
+//Generator Muons Propagated To RPC1
+  ho_muon_tree->Branch("GenMuonPropToRPC1_pdgIds",
+		       "std::vector<int>",&genMuonPropToRPC1.pdgIds);
+  ho_muon_tree->Branch("GenMuonPropToRPC1_Etas",
+                       "std::vector<Float_t>",&genMuonPropToRPC1.etas);
+  ho_muon_tree->Branch("GenMuonPropToRPC1_Phis",
+                       "std::vector<Float_t>",&genMuonPropToRPC1.phis);
+  ho_muon_tree->Branch("GenMuonPropToRPC1_Pts",
+                       "std::vector<Float_t>",&genMuonPropToRPC1.pts);
+
   //L1Muon
   ho_muon_tree->Branch("L1Muon_Etas",
                        "std::vector<Float_t>",&l1muon.etas);
@@ -423,7 +590,6 @@ void hoMuonTreeBuilder::initializeBranches(){
                        "std::vector<Float_t>",&horeco.energies);
 
   // HLT Triggers Objects
-  
   auto trigMapIt = mapHLTObjects.begin();
   for(; trigMapIt != mapHLTObjects.end(); ++trigMapIt){
 
@@ -443,6 +609,14 @@ void hoMuonTreeBuilder::initializeBranches(){
     ho_muon_tree->Branch(ptBranchName.str().c_str(),
 			 "std::vector<Float_t>",&(trigMapIt->second.pts));
   }
+
+  //HLT Trigger Objects Propagated To RPC1
+  ho_muon_tree->Branch("hltMu5PropToRPC1_Etas",
+                       "std::vector<Float_t>",&hltPropToRPC1.etas);
+  ho_muon_tree->Branch("hltMu5PropToRPC1_Phis",
+                       "std::vector<Float_t>",&hltPropToRPC1.phis);
+  ho_muon_tree->Branch("hltMu5PropToRPC1_Pts",
+                       "std::vector<Float_t>",&hltPropToRPC1.pts);
     
 }
 

@@ -44,6 +44,10 @@
 
 #include "Geometry/CaloGeometry/interface/CaloGeometry.h"
 #include "Geometry/Records/interface/CaloGeometryRecord.h"
+#include "MagneticField/Engine/interface/MagneticField.h"
+#include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
+#include "TrackPropagation/SteppingHelixPropagator/interface/SteppingHelixPropagator.h"
+#include "TrackingTools/TrajectoryState/interface/TrajectoryStateOnSurface.h"
 
 #include "HoMuonTrigger/hoTriggerAnalyzer/interface/HistogramBuilder.h"
 
@@ -52,6 +56,8 @@
 #include <iostream>
 #include <map>
 #include <list>
+
+#include "math.h"
 
 using namespace::std;
 
@@ -76,7 +82,6 @@ struct basic_HORecHit{
   vector<float>* phis=0;
   vector<float>* energies=0;
 };
-
 
 
 //
@@ -143,22 +148,38 @@ class hoMuonTreeBuilder : public edm::EDAnalyzer {
   TTree *ho_muon_tree;
   void initializeBranches();
   void fillGeneratorWeights(edm::Handle<GenEventInfoProduct> & genEventInfo);
-  void fillGeneratorParticles(edm::Handle<reco::GenParticleCollection> & truthParticles);
+  void fillGeneratorParticles(edm::Handle<reco::GenParticleCollection> & genParticles);
   void fillL1Muons(edm::Handle<l1extra::L1MuonParticleCollection> & l1Muons);
   void fillHORecHits(edm::Handle<HORecHitCollection> &hoRecoHits,
 		     edm::ESHandle<CaloGeometry> & caloGeo);
   void fillHLTTrigObjects(edm::Handle<trigger::TriggerEvent> triggerSummary,
 			  string hlt_key, edm::InputTag lastFilterTag);
-  
+  void fillGenMuonPropParticles(edm::Handle<reco::GenParticleCollection> & genParticles,
+				edm::ESHandle<MagneticField> & bField,
+				edm::ESHandle<Propagator> & shProp);
+  void fillGenMuonPropParticles(double radius, basic_Generator *genMuonProp, 
+				edm::Handle<reco::GenParticleCollection> & genParticles,
+				edm::ESHandle<MagneticField> & bField,
+				edm::ESHandle<Propagator> & shProp);
+  void fillHLTPropObjects(edm::Handle<trigger::TriggerEvent> & triggerSummary,
+			  edm::ESHandle<MagneticField> & bField,
+			  edm::ESHandle<Propagator> & shProp);
+  void fillHLTPropObjects(double radius, basic_TrigObject *hltPropToRPC1, 
+			   edm::Handle<trigger::TriggerEvent> & triggerSummary,
+			   edm::ESHandle<MagneticField> & bField,
+			   edm::ESHandle<Propagator> & shProp);
+   TrajectoryStateOnSurface propagateToCylinder(FreeTrajectoryState & initial, double radius, 
+						edm::ESHandle<Propagator> & shProp);
     
   //Particle Information
   double weight;
   basic_Generator generator;
   basic_TrigObject l1muon;
   basic_HORecHit horeco;
+  basic_Generator genMuonPropToHO;
+  basic_Generator genMuonPropToRPC1;
+  basic_TrigObject hltPropToRPC1;
   map<string, basic_TrigObject> mapHLTObjects;
-  
-  
 
   // HLT Trigger Object Information (Possible to look at multiple filters)
   //map<string, vector<float>*> hltTrigObjects_etas;
@@ -166,6 +187,16 @@ class hoMuonTreeBuilder : public edm::EDAnalyzer {
   //map<string,vector<float>*> hltObjects_pts;
 
 
+  //Radiuses for Propagation
+  
+  //double ho_radius = 412.6; // In cm                                                  
+  //From hcalouteralgo.xml Chose yLayer 1, same in all rings.                        
+  
+  double yLayer1 = 406.6;
+  double xOff = -36.0674;
+  double ho_radius = sqrt(pow(yLayer1,2)+pow(xOff,2));
+  
+  double rpc1_radius = 414.65;
 
   //virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
   //virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;

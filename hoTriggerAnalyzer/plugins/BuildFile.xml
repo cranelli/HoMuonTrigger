@@ -16,6 +16,9 @@
 <use name="PhysicsTools/UtilAlgos"/>
 <use name="Geometry/Records"/>
 <use name="Geometry/CaloGeometry"/>
+<use name="MagneticField/Records"/>
+<use name="TrackPropagation/SteppingHelixPropagator"/>
+<use name="TrackingTools/Records"/>
 <use name="Geometry/CommonDetUnit"/>
 <use name="DataFormats/GeometrySurface"/>
 <flags EDM_PLUGIN="1"/>
