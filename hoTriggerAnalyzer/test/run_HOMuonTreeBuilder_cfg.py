@@ -14,16 +14,16 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source("PoolSource",
     # replace 'myfile.root' with the source file you want to use
     fileNames = cms.untracked.vstring(
-    #'file:/afs/cern.ch/work/c/cranelli/'
-    #'public/HO_Muon/Samples/'
-    #'0009CDC8-CCD6-E311-A9AD-90E6BAE8CC37.root'
+    'file:/afs/cern.ch/work/c/cranelli/'
+    'public/HO_Muon/Samples/'
+    '0009CDC8-CCD6-E311-A9AD-90E6BAE8CC37.root'
     #'root://xrootd.unl.edu//store//mc/'
     #'Fall13dr/QCD_Pt-300to470_Tune4C_13TeV_pythia8/GEN-SIM-RAW/'
     #'castor_tsg_PU40bx25_POSTLS162_V2-v1/'
     #'00000/001C52C5-2EA4-E311-AA23-003048678F9C.root'
-    'file:/data/users/cranelli/HOL1Muon/HOL1Muon_Samples/'
-    'Spring14dr/QCD_Pt-15to3000_Flat/RECO/'
-    '0009CDC8-CCD6-E311-A9AD-90E6BAE8CC37.root'
+    #'file:/data/users/cranelli/HOL1Muon/HOL1Muon_Samples/'
+    #'Spring14dr/QCD_Pt-15to3000_Flat/RECO/'
+    #'0009CDC8-CCD6-E311-A9AD-90E6BAE8CC37.root'
     )       
 )
 
