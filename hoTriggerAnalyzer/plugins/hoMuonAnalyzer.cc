@@ -207,7 +207,7 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
    float qScale = genEventInfo->qScale();
    //cout << "Event Generator Qscale" << qScale << endl;
    histogramBuilder.fillPtHistograms(qScale,genEventInfo_key,weight);
-   histogramBuilder.fillPtHistograms(qScale,genEventInfoNoWeight_key, weight);
+   histogramBuilder.fillPtHistograms(qScale,genEventInfoNoWeight_key);
    
 
    /*
