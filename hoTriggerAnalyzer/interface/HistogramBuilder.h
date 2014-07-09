@@ -42,6 +42,7 @@ class HistogramBuilder {
   void fillCountHistogram(std::string key,double_t weight=1);    
   void fillTrigHistograms(bool trigDecision,std::string key, double_t weight=1);
   void fillWeightHistograms(float weight_val, std::string key, double_t weight=1);
+  void fillQScaleHistograms(float Q_Scale, std::string key, double_t weight=1);
   //int getMyNumber(); //{return mynumber;}
 
  private:
@@ -58,6 +59,7 @@ class HistogramBuilder {
   std::map<std::string,TH2F*> _h2DeltaEtaDeltaPhi;
   std::map<std::string,TH1F*> _h1Trig;
   std::map<std::string,TH1F*> _h1Weight;
+  std::map<std::string,TH1F*> _h1QScale;
   std::map<std::string,TH1F*> _h1Counter; 
   
   /*

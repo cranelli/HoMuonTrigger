@@ -64,7 +64,20 @@ void HistogramBuilder::fillWeightHistograms(float weight_val,std::string key, do
   _h1Weight[key]->Fill(weight_val, weight);                                        
      
 }
-      
+
+/*
+ * Q Scale Histograms
+ */
+void HistogramBuilder::fillQScaleHistograms(float Q_Scale, std::string key, double_t weight){
+  if(!_h1QScale.count(key)){
+        
+    _h1QScale[key] = _fileService->make<TH1F>(Form("%s_Q_Scale",key.c_str()),
+					  Form("%s Q Scale",key.c_str()),
+					  6000,0,3000);
+    SetAxises(_h1QScale[key],"GeV", "Counts");
+  } 
+  _h1QScale[key]->Fill(Q_Scale, weight);
+}
 
 /*                                          
  *Energy Histograms
@@ -178,6 +191,7 @@ if(!_h1InvPt.count(key)){
   } 
  _h1InvPt[key]->Fill(1.0/pt, weight);
 }
+
 
 
 /*

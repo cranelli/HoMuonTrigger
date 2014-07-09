@@ -203,11 +203,14 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
    //cout << "Event Generator Weight: " << weight << endl;
    histogramBuilder.fillWeightHistograms(weight, genEventInfo_key);
    
+   /*
+    * Additional Event Info
+    */
    
    float qScale = genEventInfo->qScale();
    //cout << "Event Generator Qscale" << qScale << endl;
-   histogramBuilder.fillPtHistograms(qScale,genEventInfo_key,weight);
-   histogramBuilder.fillPtHistograms(qScale,genEventInfoNoWeight_key);
+   histogramBuilder.fillQScaleHistograms(qScale,genEventInfo_key,weight);
+   histogramBuilder.fillQScaleHistograms(qScale,genEventInfoNoWeight_key);
    
 
    /*

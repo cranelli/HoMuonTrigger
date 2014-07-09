@@ -83,6 +83,8 @@ struct basic_HORecHit{
   vector<float>* energies=0;
 };
 
+const double minGenParticlePt = 2;
+
 
 //
 // HO Muon Tree Builder Class Declaration
@@ -148,7 +150,7 @@ class hoMuonTreeBuilder : public edm::EDAnalyzer {
   TTree *ho_muon_tree;
   void initializeBranches();
   void fillGeneratorWeights(edm::Handle<GenEventInfoProduct> & genEventInfo);
-  void fillGeneratorParticles(edm::Handle<reco::GenParticleCollection> & genParticles);
+  void fillGeneratorParticles(edm::Handle<reco::GenParticleCollection> & genParticles, double ptFilter);
   void fillL1Muons(edm::Handle<l1extra::L1MuonParticleCollection> & l1Muons);
   void fillHORecHits(edm::Handle<HORecHitCollection> &hoRecoHits,
 		     edm::ESHandle<CaloGeometry> & caloGeo);

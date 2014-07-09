@@ -178,7 +178,7 @@ hoMuonTreeBuilder::analyze(const edm::Event& iEvent,
 			       useL1GtTriggerMenuLite);
    
    fillGeneratorWeights(genEventInfo);
-   fillGeneratorParticles(genParticles);
+   fillGeneratorParticles(genParticles, minGenParticlePt);
    fillL1Muons(l1Muons);
    fillHORecHits(hoRecoHits, caloGeo);
    
@@ -332,7 +332,7 @@ void hoMuonTreeBuilder::fillGeneratorWeights(edm::Handle<GenEventInfoProduct> & 
 
 
 void hoMuonTreeBuilder::fillGeneratorParticles(edm::Handle<reco::GenParticleCollection>
-					       & genParticles){
+					       & genParticles, double ptFilter){
   generator.pdgIds->clear();
   generator.etas->clear();
   generator.phis->clear();
@@ -341,6 +341,7 @@ void hoMuonTreeBuilder::fillGeneratorParticles(edm::Handle<reco::GenParticleColl
   auto bgen = genParticles->begin();
 
   for( ; bgen != genParticles->end(); ++bgen ) {
+     if(bgen->pt() < ptFilter) continue;
     generator.pdgIds->push_back(bgen->pdgId());
     generator.etas->push_back(bgen->eta());
     generator.phis->push_back(bgen->phi());
