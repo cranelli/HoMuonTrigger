@@ -201,7 +201,7 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
    string genEventInfoNoWeight_key = "GenEventInfo_NoWeight";
    weight = genEventInfo->weight();
    //cout << "Event Generator Weight: " << weight << endl;
-   histogramBuilder.fillWeightHistograms(weight, genEventInfo_key, weight);
+   histogramBuilder.fillWeightHistograms(weight, genEventInfo_key);
    
    
    float qScale = genEventInfo->qScale();
@@ -214,7 +214,8 @@ hoMuonAnalyzer::analyze(const edm::Event& iEvent,
     * Event Count
     */
 
-   histogramBuilder.fillCountHistogram("Events",weight);
+   histogramBuilder.fillCountHistogram("Normalized_Events",weight);
+   histogramBuilder.fillCountHistogram("Unnormalized_Events");
 
    /*
     * Level 1 Muons
