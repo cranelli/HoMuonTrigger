@@ -39,6 +39,7 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/L1Trigger/interface/L1MuonParticle.h"
 #include "DataFormats/L1Trigger/interface/L1MuonParticleFwd.h"
+#include "DataFormats/L1GlobalMuonTrigger/interface/L1MuGMTExtendedCand.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/HcalRecHit/interface/HORecHit.h"
@@ -317,13 +318,13 @@ void hoMuonTreeBuilder::defineTriggersOfInterest(){
   mapHLTObjects.insert(pair<string,basic_TrigObject>(hltIsoMu24_key, hltIsoMu24));
   */
 
-  basic_TrigObject hltMu5;
+  basic_HLT hltMu5;
   string hltMu5_key = "hltMu5";
   hltNamesOfInterest.insert(pair<string, string>(hltMu5_key, "HLT_Mu5_v21"));
   hltFiltersOfInterest.insert(pair<string, edm::InputTag>(hltMu5_key, 
 							  edm::InputTag("hltL3fL1sMu3L3Filtered5",
 									"","HLT")));
-  mapHLTObjects.insert(pair<string,basic_TrigObject>(hltMu5_key, hltMu5));
+  mapHLTObjects.insert(pair<string,basic_HLT>(hltMu5_key, hltMu5));
 }
 
 void hoMuonTreeBuilder::fillGeneratorWeights(edm::Handle<GenEventInfoProduct> & genEventInfo){
@@ -421,7 +422,7 @@ void hoMuonTreeBuilder::fillHLTPropObjects(edm::Handle<trigger::TriggerEvent> & 
 
 // To start with, I am only propagating hltMu5
 
-void hoMuonTreeBuilder::fillHLTPropObjects(double radius, basic_TrigObject* hltProp,
+void hoMuonTreeBuilder::fillHLTPropObjects(double radius, basic_HLT* hltProp,
 			edm::Handle<trigger::TriggerEvent> & triggerSummary,
 			edm::ESHandle<MagneticField> & bField,
 			edm::ESHandle<Propagator> & shProp){
@@ -486,6 +487,7 @@ void hoMuonTreeBuilder::fillL1Muons(edm::Handle<l1extra::L1MuonParticleCollectio
   l1muon.etas->clear();
   l1muon.phis->clear();
   l1muon.pts->clear();
+  l1muon.qualities->clear();
   
   auto bL1muon = l1Muons->cbegin();
   
@@ -493,6 +495,7 @@ void hoMuonTreeBuilder::fillL1Muons(edm::Handle<l1extra::L1MuonParticleCollectio
     l1muon.etas->push_back(bL1muon->eta());
     l1muon.phis->push_back(bL1muon->phi());
     l1muon.pts->push_back(bL1muon->pt());
+    std::cout << "Quality is: " << bL1muon->gmtMuonCand().quality() << std::endl;
   }
 }
 

@@ -71,10 +71,17 @@ struct basic_Generator{
   vector<float>* pts=0;
 };
 
-struct basic_TrigObject{
+struct basic_HLT{
   vector<float>* etas=0;
   vector<float>* phis=0;
   vector<float>* pts=0;
+};
+
+struct basic_L1Muon{
+  vector<float>* etas=0;
+  vector<float>* phis=0;
+  vector<float>* pts=0;
+  vector<unsigned int>* qualities = 0;
 };
 
 struct basic_HORecHit{
@@ -166,7 +173,7 @@ class hoMuonTreeBuilder : public edm::EDAnalyzer {
   void fillHLTPropObjects(edm::Handle<trigger::TriggerEvent> & triggerSummary,
 			  edm::ESHandle<MagneticField> & bField,
 			  edm::ESHandle<Propagator> & shProp);
-  void fillHLTPropObjects(double radius, basic_TrigObject *hltPropToRPC1, 
+  void fillHLTPropObjects(double radius, basic_HLT *hltPropToRPC1, 
 			   edm::Handle<trigger::TriggerEvent> & triggerSummary,
 			   edm::ESHandle<MagneticField> & bField,
 			   edm::ESHandle<Propagator> & shProp);
@@ -176,12 +183,12 @@ class hoMuonTreeBuilder : public edm::EDAnalyzer {
   //Particle Information
   double weight;
   basic_Generator generator;
-  basic_TrigObject l1muon;
+  basic_L1Muon l1muon;
   basic_HORecHit horeco;
   basic_Generator genMuonPropToHO;
   basic_Generator genMuonPropToRPC1;
-  basic_TrigObject hltPropToRPC1;
-  map<string, basic_TrigObject> mapHLTObjects;
+  basic_HLT hltPropToRPC1;
+  map<string, basic_HLT> mapHLTObjects;
 
   // HLT Trigger Object Information (Possible to look at multiple filters)
   //map<string, vector<float>*> hltTrigObjects_etas;
