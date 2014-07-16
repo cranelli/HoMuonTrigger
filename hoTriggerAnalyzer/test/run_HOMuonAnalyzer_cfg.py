@@ -14,17 +14,18 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source("PoolSource",
     # replace 'myfile.root' with the source file you want to use
     fileNames = cms.untracked.vstring(
-    'file:/afs/cern.ch/work/c/cranelli/'
-    'public/HO_Muon/Samples/'
-    '0009CDC8-CCD6-E311-A9AD-90E6BAE8CC37.root'
+    #'file:/afs/cern.ch/work/c/cranelli/'
+    #'public/HO_Muon/Samples/'
+    #'0009CDC8-CCD6-E311-A9AD-90E6BAE8CC37.root'
 
-    #'root://xrootd.unl.edu//store//mc/'
-    #'Spring14dr/QCD_Pt-15to3000_Tune4C_Flat_13TeV_pythia8/GEN-SIM-RECO/PU20bx25_POSTLS170_V5-v1/'
-    #'00000/0009CDC8-CCD6-E311-A9AD-90E6BAE8CC37.root'
+    'root://xrootd.unl.edu//store//mc/'
+    'Spring14dr/QCD_Pt-15to3000_Tune4C_Flat_13TeV_pythia8/GEN-SIM-RECO/PU20bx25_POSTLS170_V5-v1/'
+    '00000/0009CDC8-CCD6-E311-A9AD-90E6BAE8CC37.root'
     
     #'file:/data/users/cranelli/HOL1Muon/HOL1Muon_Samples/'
-    #'Fall13dr/QCD_Pt-300to470_Tune4C_13TeV_pythia8/GEN-SIM-RAW/'
-    #'RAW_QCD_Pt-300to470_PU40bx25_POSTLS162_V2.root'
+    #'Spring14dr/QCD_Pt-15to3000_Flat/RECO/'
+    #'0009CDC8-CCD6-E311-A9AD-90E6BAE8CC37.root'
+    
     )
        
 )

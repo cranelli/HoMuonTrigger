@@ -587,7 +587,7 @@ void hoMuonTreeBuilder::initializeBranches(){
                        "std::vector<Float_t>",&horeco.etas);
   ho_muon_tree->Branch("HOReco_Phis",
                        "std::vector<Float_t>",&horeco.phis);
-  ho_muon_tree->Branch("HOReco_Pts",
+  ho_muon_tree->Branch("HOReco_Energies",
                        "std::vector<Float_t>",&horeco.energies);
 
   // HLT Triggers Objects

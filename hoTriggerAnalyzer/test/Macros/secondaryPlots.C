@@ -8,7 +8,7 @@
 //#include "TList.h"
 
 
-const char* fileDir = "/data/users/cranelli/HOL1Muon/HOL1Muon_Histograms/QCD_Flat/Version_2_3/";
+const char* fileDir = "/home/cranelli/HO_Muon/Spring14/FLAT_QCD/CMSSW_7_0_0/src/HoMuonTrigger/hoTriggerAnalyzer/test/Macros/TreeLoop";
 const char* ptHat = "";
 
 //const char* fileDir = "/data/users/cranelli/HOL1Muon/HOL1Muon_Histograms/QCD/Version_1_3/";
@@ -16,7 +16,7 @@ const char* ptHat = "";
 //"/home/cranelli/HO_Muon/Fall13/RAW/CMSSW_6_2_9/src/Analysis/hoTriggerAnalyzer/test/";
 const char* fileName="L1MuonHistogram.root";
 const char* newFileName = "L1MuonHistogram_Plus.root";
-const char* histDir="demo/";
+const char* histDir="";
 
 using namespace std;
 
@@ -26,7 +26,7 @@ TFile * newFile;
 /*
  * Using a series of helper Macros,
  * This produces the secondary Plots of interests.
- * Made from using the primary plots.
+ * Made using the primary histograms.
  */
 
 void secondaryPlots(){
@@ -38,34 +38,37 @@ void secondaryPlots(){
 
 
   // Normal L1 Muon Barrel_Pt
-  TH1F* h1L1Norm = divideByBinWidth("L1MuonBarrel_Pt");
+  TH1F* h1L1Norm = divideByBinWidth("L1Muon_Barrel_Pt");
   SetAxises(h1L1Norm, "Pt", "dN/dx");
   //h1Norm->Draw("HIST");
   h1L1Norm->Write();
-
-  TH1F* h1L1MipNorm = divideByBinWidth("L1MuonBarrelwithMipMatch_Pt");
+  
+  TH1F* h1L1MipNorm = divideByBinWidth("L1MuonBwithMip_Pt");
   SetAxises(h1L1MipNorm, "Pt", "dN/dx");
   h1L1MipNorm->Write();
 
-  TH1F* h1L1HLTNorm = divideByBinWidth("L1MuonBarrelwithHLTMatch_Pt");
+  TH1F* h1L1HLTNorm = divideByBinWidth("L1MuonBarrelwithMipMatchHLT_Pt");
   SetAxises(h1L1HLTNorm, "Pt", "dN/dx");
   h1L1HLTNorm->Write();
-
   
+  
+  /*
   //Signal 
   std::stringstream Signal;
   Signal  <<"Signal" << endl;
   //Signal << ptHat <<"_Signal" << endl;
-  divide("L1MuonBarrelwithMipHLTMatch_Pt", "L1MuonBarrelwithHLTMatch_Pt", Signal.str().c_str());
+  divide("L1MuonBarrelwithMipMatchHLT_Pt", "L1MuonBarrelMatchHLT_Pt", Signal.str().c_str());
+  */
 
   //Background
-  TH1F* back_num = subtract("L1MuonBarrelwithMipMatch_Pt", "L1MuonBarrelwithMipHLTMatch_Pt", "L1MuonBarrelwithMipNOHLTMatch_Pt");
-  TH1F* back_den = subtract("L1MuonBarrel_Pt", "L1MuonBarrelwithHLTMatch_Pt", "L1MuonBarrelwithoutHLTMatch_Pt");
+  TH1F* back_num = subtract("L1MuonBwithMip_Pt", "L1MuonBarrelwithMipMatchHLT_Pt", "L1MuonBarrelwithMipNOHLTMatch_Pt");
+  TH1F* back_den = subtract("L1Muon_Barrel_Pt", "L1MuonBarrelMatchHLT_Pt", "L1MuonBarrelwithoutHLTMatch_Pt");
   
   std::stringstream Background;
   Background <<"Background" << endl;
-  //divide(back_num, back_den, Background.str().c_str());
+  divide(back_num, back_den, Background.str().c_str());
   
+
   //newFile->Write();
   inFile->Close();
 }
