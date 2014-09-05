@@ -83,7 +83,7 @@ Bool_t HOMuon_TreeLoop_Plotter::Process(Long64_t entry)
 
   fChain->GetEntry(entry);
   //if(entry > 100000) return kFALSE;  //To speed up testing only run over part of dataset.
-  std::cout << entry << std::endl;
+  if(entry%1000==0) std::cout << entry << std::endl;
   
   /*
    * Weighting Information
@@ -173,6 +173,8 @@ Bool_t HOMuon_TreeLoop_Plotter::Process(Long64_t entry)
     histogramBuilder.fillEtaPhiHistograms(hltMu5_Etas->at(hltMu5_index),
 					  hltMu5_Phis->at(hltMu5_index),
 					  hltMu5_key);
+    histogramBuilder.fillPtHistograms(hltMu5_Pts->at(hltMu5_index),
+				      hltMu5_key, weight);
   }
 
   /*
@@ -263,10 +265,10 @@ Bool_t HOMuon_TreeLoop_Plotter::Process(Long64_t entry)
     bool hasHlt = false; //Only takes one match to be true
    
     for(unsigned int hltProp_index = 0; hltProp_index < hltMu5PropToRPC1_Etas->size(); hltProp_index++){
-      float hlt_eta, hlt_phi; 
+      float hlt_eta, hlt_phi, hlt_pt; 
       hlt_eta = hltMu5PropToRPC1_Etas->at(hltProp_index);
       hlt_phi = hltMu5PropToRPC1_Phis->at(hltProp_index);
-      //hlt_pt = hltMu5PropToRPC1_Pts->at(hltProp_index);
+      hlt_pt = hltMu5PropToRPC1_Pts->at(hltProp_index);
       std::string hltPropAndL1MuonB_key = "HLTProp_and_L1MuonBarrel";
       histogramBuilder.fillDeltaEtaDeltaPhiHistograms(l1MuonB_eta, hlt_eta,
 						      l1MuonB_phi, hlt_phi,
@@ -277,6 +279,8 @@ Bool_t HOMuon_TreeLoop_Plotter::Process(Long64_t entry)
 	histogramBuilder.fillDeltaEtaDeltaPhiHistograms(l1MuonB_eta, hlt_eta,
 							l1MuonB_phi, hlt_phi,
 							hltPropMatchL1MuonB_key, weight);
+	//Look at Spread Between L1MuonB and HLT Pt
+	histogramBuilder.fillScatterPt(l1MuonB_pt, hlt_pt, hltPropMatchL1MuonB_key, weight);
       }
     }
     if(hasHlt){
@@ -285,6 +289,7 @@ Bool_t HOMuon_TreeLoop_Plotter::Process(Long64_t entry)
       histogramBuilder.fillL1MuonPtHistograms(l1MuonB_pt, l1MuonBMatchHLT_key, weight);
       histogramBuilder.fillEtaPhiHistograms(l1MuonB_eta,l1MuonB_phi,
 					    l1MuonBMatchHLT_key, weight);
+
     } else {
       std::string l1MuonBNoHLT_key = "L1MuonBarrel_NoHLT";
       histogramBuilder.fillCountHistogram(l1MuonBNoHLT_key,weight);

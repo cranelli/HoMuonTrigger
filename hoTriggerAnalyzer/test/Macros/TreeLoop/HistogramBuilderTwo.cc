@@ -186,6 +186,21 @@ if(!_h1InvPt.count(key)){
  _h1InvPt[key]->Fill(1.0/pt, weight);
 }
 
+/*
+ * Scatter Pt Plot
+ */
+
+void HistogramBuilderTwo::fillScatterPt(float pt1, float pt2, std::string key, double weight){
+  if(!_h2ScatterPt.count(key)){
+    _h2ScatterPt[key] = new TH2F(Form("%s_ScatterPt",key.c_str()),
+				 Form("%s_ScatterPt",key.c_str()),
+				 400, 0, 200, 400, 0, 200);
+    SetAxises(_h2ScatterPt[key], "P_t (GeV)","P_t (GeV)");
+  }
+  _h2ScatterPt[key]->Fill(pt1, pt2, weight);
+}
+
+
 
 /*
  *L1Muon Pt Histograms

@@ -39,6 +39,7 @@ class HistogramBuilderTwo {
   void fillCountHistogram(std::string key,double weight=1);    
   void fillTrigHistograms(bool trigDecision,std::string key, double weight=1);
   void fillWeightHistograms(float weight_val, std::string key, double weight=1);
+  void fillScatterPt(float pt1, float pt2, std::string key, double weight);
   
   float WrapCheck(float phi1, float phi2);
   //int getMyNumber(); //{return mynumber;}
@@ -48,6 +49,7 @@ class HistogramBuilderTwo {
   std::map<std::string,TH1F*> _h1L1MuonPt;
   std::map<std::string,TH1F*> _h1Pt;
   std::map<std::string,TH1F*> _h1InvPt;
+  std::map<std::string,TH2F*> _h2ScatterPt;
   std::map<std::string,TH1F*> _h1Energy;                                 
   std::map<std::string,TH1F*> _h1Eta;
   std::map<std::string,TH1F*> _h1Phi;

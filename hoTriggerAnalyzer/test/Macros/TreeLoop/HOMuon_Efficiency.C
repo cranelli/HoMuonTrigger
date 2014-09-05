@@ -27,9 +27,11 @@
 #define VERSION "Version_4_2/"
 #define ROOTFILE_NAME "HOMuonTree.root"
 #define TREE_LOC "demo/ho_muon_tree"
-#define MAX_EVENTS 500000
 
-void HOMuon_Plotter(){  
+#define MAX_EVENT 10000
+
+
+void HOMuon_Efficiency(){  
   
   std::stringstream rootFileLoc;
   rootFileLoc << ROOTFILE_DIR << VERSION << ROOTFILE_NAME;
@@ -40,14 +42,15 @@ void HOMuon_Plotter(){
   TTree* T = (TTree*)inFile->Get(TREE_LOC);
   cout<< T << endl;
   //gRoot->ProcessLine(".L HOMuon_TreeLoop_FrontBack_Plotter.C+");
-  T->Process("HOMuon_TreeLoop_Plotter.C+", "",MAX_EVENTS);
+  //T->SetMaxEntryLoop(MAX_EVENT);
+  T->Process("HOMuon_TreeLoop_Efficiency.C+", "", MAX_EVENT);
 
 
 
   //For MakeClass
-  //gROOT->ProcessLine(".L HOMuon_Loop_Plotter.C");
+  //gROOT->ProcessLine(".L HOMuon_Loop_Efficiency.C");
   //gROOT->ProcessLine(".L ../../plugins/HistogramBuilder.cc");
-  //HOMuon_Loop_Plotter looper;
+  //HOMuon_Loop_Efficiency looper;
   //looper.Loop();
   //looper.Show(16);
   cout << "working" << endl;
