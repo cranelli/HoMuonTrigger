@@ -20,7 +20,7 @@
 
 //Define Constants for the Efficiency Tree Analyzer
 
-static const int MaxEvent=10000;
+//static const int MaxEvent=10000;
 
 
 static const float barrel_eta = 1.3;
@@ -28,11 +28,14 @@ static const float barrel_eta = 1.3;
 static const float RMip_Max = 0.2;
 static const float RHlt_Max = 0.4;
 
-static const int num_Tcuts = 10;
+static const int num_Tcuts = 16;
+float thresholds[num_Tcuts];
 
-double thresholds[num_Tcuts];
 double efficiencyNum_count[num_Tcuts];
 double efficiencyDen_count;
+double backgroundDen_count;
+double backgroundNum_count[num_Tcuts];
+
 
 //int accepted_count[num_Tcuts];
 //int fake_count[num_Tcuts];

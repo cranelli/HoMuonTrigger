@@ -38,11 +38,11 @@ void HOMuon_TreeLoop_Efficiency::Begin(TTree * /*tree*/)
    TString option = GetOption();
    
    efficiencyDen_count=0;
+   backgroundDen_count=0;
    for(int i_Tcut=0; i_Tcut < num_Tcuts; i_Tcut++){
-     thresholds[i_Tcut]=(double)0.05+0.05*i_Tcut;
+     thresholds[i_Tcut]=0.05+0.05*i_Tcut;
      efficiencyNum_count[i_Tcut]=0;
-     //accepted_count[i_Tcut]=0;
-     //fake_count[i_Tcut]=0;
+     backgroundNum_count[i_Tcut]=0;
    }
 }
 
@@ -113,6 +113,8 @@ Bool_t HOMuon_TreeLoop_Efficiency::Process(Long64_t entry)
     }
     if(hasHlt){
       efficiencyDen_count+=weight;
+    }else{
+      backgroundDen_count+=weight;
     }
   }
 
@@ -122,18 +124,17 @@ Bool_t HOMuon_TreeLoop_Efficiency::Process(Long64_t entry)
 
   vector<unsigned int> l1MuonBMipIndices[num_Tcuts];
   for(unsigned int i =0; i< l1MuonBIndices.size(); i++){
-    float l1MuonB_eta, l1MuonB_phi;
-    l1MuonB_eta = L1Muon_Etas->at(l1MuonBIndices[i]);
-    l1MuonB_phi = L1Muon_Phis->at(l1MuonBIndices[i]);
     for(int i_Tcut=0; i_Tcut< num_Tcuts; i_Tcut++){
       l1MuonBMipIndices[i_Tcut].clear();
+      float l1MuonB_eta, l1MuonB_phi;
+      l1MuonB_eta = L1Muon_Etas->at(l1MuonBIndices[i]);
+      l1MuonB_phi = L1Muon_Phis->at(l1MuonBIndices[i]);
       bool hasMip = false; //Only takes one match to be true
       for(unsigned int hoReco_index = 0; hoReco_index < HOReco_Etas->size(); hoReco_index++){
 	float horeco_eta, horeco_phi, horeco_energy;
-	std::string hoRecoL1MuonBEvent_key = "HO_Reco_L1MuonBEvent";
 	horeco_eta = HOReco_Etas->at(hoReco_index);
 	horeco_phi = HOReco_Phis->at(hoReco_index);
-	horeco_energy = HOreco_Energies->at(hoReco_index);
+	horeco_energy = HOReco_Energies->at(hoReco_index);
 	//Position Match HO Rec Hit to L1MuonB 
 	if(isInsideRCut(RMip_Max, l1MuonB_eta, horeco_eta, l1MuonB_phi, horeco_phi)){
 	  //Select Rec Hits Above Threshold set Mips
@@ -168,11 +169,12 @@ Bool_t HOMuon_TreeLoop_Efficiency::Process(Long64_t entry)
 	if(isInsideRCut(RHlt_Max, l1MuonBMip_eta, hlt_eta, l1MuonBMip_phi, hlt_phi)){
 	  hasHlt = true; //Only takes one match to be true 
 	}
-	}
+      }
       if(hasHlt){
 	efficiencyNum_count[i_Tcut]+=weight;
+      }else{
+	backgroundNum_count[i_Tcut]+=weight;
       }
-      
     }
   }
 
@@ -193,9 +195,20 @@ void HOMuon_TreeLoop_Efficiency::Terminate()
    // a query. It always runs on the client, it can be used to present
    // the results graphically or save the results to file.
   cout << "Efficiency Denominator Count:" << efficiencyDen_count << endl;
+  cout << "Background Denominator Count:" << backgroundDen_count << endl;
   cout << "Efficiency Numerator Count:" << endl;
-  for(int i_Tcut; i_Tcut < num_Tcuts; i_Tcut++){
+  for(int i_Tcut=0; i_Tcut < num_Tcuts; i_Tcut++){
     cout << "     Threshold " << thresholds[i_Tcut] << ": " << efficiencyNum_count[i_Tcut] << endl;
+  }
+  cout << "Background Numerator Count:" << endl;
+  for(int i_Tcut=0; i_Tcut < num_Tcuts; i_Tcut++){
+    cout << "     Threshold " << thresholds[i_Tcut] << ": " << backgroundNum_count[i_Tcut] << endl;
+  }
+  cout << "Percentages" << endl;
+  for(int i_Tcut=0; i_Tcut < num_Tcuts; i_Tcut++){
+    cout << "Threshold: " << thresholds[i_Tcut] << " " 
+	 << "Efficiency: " << efficiencyNum_count[i_Tcut]/efficiencyDen_count << " "  
+	 << "Background: " << backgroundNum_count[i_Tcut]/backgroundDen_count << endl;
   }
 }
 
