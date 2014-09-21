@@ -53,7 +53,7 @@ public :
    vector<float>   *L1Muon_Pts;
    vector<float>   *HOReco_Etas;
    vector<float>   *HOReco_Phis;
-   vector<float>   *HOReco_Pts;
+   vector<float>   *HOReco_Energies;
    vector<float>   *hltMu5_Etas;
    vector<float>   *hltMu5_Phis;
    vector<float>   *hltMu5_Pts;
@@ -80,7 +80,7 @@ public :
    TBranch        *b_L1Muon_Pts;   //!
    TBranch        *b_HOReco_Etas;   //!
    TBranch        *b_HOReco_Phis;   //!
-   TBranch        *b_HOReco_Pts;   //!
+   TBranch        *b_HOReco_Energies;   //!
    TBranch        *b_hltMu5_Etas;   //!
    TBranch        *b_hltMu5_Phis;   //!
    TBranch        *b_hltMu5_Pts;   //!
@@ -147,7 +147,7 @@ void HOMuon_TreeLoop_Plotter::Init(TTree *tree)
    L1Muon_Pts = 0;
    HOReco_Etas = 0;
    HOReco_Phis = 0;
-   HOReco_Pts = 0;
+   HOReco_Energies = 0;
    hltMu5_Etas = 0;
    hltMu5_Phis = 0;
    hltMu5_Pts = 0;
@@ -177,7 +177,7 @@ void HOMuon_TreeLoop_Plotter::Init(TTree *tree)
    fChain->SetBranchAddress("L1Muon_Pts", &L1Muon_Pts, &b_L1Muon_Pts);
    fChain->SetBranchAddress("HOReco_Etas", &HOReco_Etas, &b_HOReco_Etas);
    fChain->SetBranchAddress("HOReco_Phis", &HOReco_Phis, &b_HOReco_Phis);
-   fChain->SetBranchAddress("HOReco_Pts", &HOReco_Pts, &b_HOReco_Pts);
+   fChain->SetBranchAddress("HOReco_Energies", &HOReco_Energies, &b_HOReco_Energies);
    fChain->SetBranchAddress("hltMu5_Etas", &hltMu5_Etas, &b_hltMu5_Etas);
    fChain->SetBranchAddress("hltMu5_Phis", &hltMu5_Phis, &b_hltMu5_Phis);
    fChain->SetBranchAddress("hltMu5_Pts", &hltMu5_Pts, &b_hltMu5_Pts);

@@ -24,7 +24,7 @@
  */
 
 #define ROOTFILE_DIR "/data/users/cranelli/HOL1Muon/Trees/"
-#define VERSION "Version_4_2/"
+#define VERSION "Version_5_1/"
 #define ROOTFILE_NAME "HOMuonTree.root"
 #define TREE_LOC "demo/ho_muon_tree"
 #define MAX_EVENTS 1000000000  //Default Max

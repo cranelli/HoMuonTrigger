@@ -134,7 +134,7 @@ Bool_t HOMuon_TreeLoop_Plotter::Process(Long64_t entry)
     histogramBuilder.fillEtaPhiHistograms(HOReco_Etas->at(hoReco_index),
                                           HOReco_Phis->at(hoReco_index),
                                           hoReco_key, weight);
-    histogramBuilder.fillEnergyHistograms(HOReco_Pts->at(hoReco_index),
+    histogramBuilder.fillEnergyHistograms(HOReco_Energies->at(hoReco_index),
 					  hoReco_key, weight); //Typo in Tree Builder should have been labeled HOeco_Energies
   }
 
@@ -207,7 +207,7 @@ Bool_t HOMuon_TreeLoop_Plotter::Process(Long64_t entry)
       std::string hoRecoL1MuonBEvent_key = "HO_Reco_L1MuonBEvent";
       horeco_eta = HOReco_Etas->at(hoReco_index);
       horeco_phi = HOReco_Phis->at(hoReco_index);
-      horeco_energy = HOReco_Pts->at(hoReco_index);
+      horeco_energy = HOReco_Energies->at(hoReco_index);
       
       //histogramBuilder.fillEtaPhiHistograms(horeco_eta,horeco_phi,
       //			    hoRecoL1MuonBEvent_key, weight);
