@@ -133,7 +133,7 @@ Bool_t HOMuon_TreeLoop_Efficiency::Process(Long64_t entry)
 	std::string hoRecoL1MuonBEvent_key = "HO_Reco_L1MuonBEvent";
 	horeco_eta = HOReco_Etas->at(hoReco_index);
 	horeco_phi = HOReco_Phis->at(hoReco_index);
-	horeco_energy = HOReco_Pts->at(hoReco_index);
+	horeco_energy = HOreco_Energies->at(hoReco_index);
 	//Position Match HO Rec Hit to L1MuonB 
 	if(isInsideRCut(RMip_Max, l1MuonB_eta, horeco_eta, l1MuonB_phi, horeco_phi)){
 	  //Select Rec Hits Above Threshold set Mips
