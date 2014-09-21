@@ -24,15 +24,18 @@ static const int MaxEvent=10000;
 
 
 static const float barrel_eta = 1.3;
-static const float threshold = 0.2;
+//static const float threshold = 0.2;
 static const float RMip_Max = 0.2;
 static const float RHlt_Max = 0.4;
 
-static const int num_Tcuts =10;
-int efficiencyNum_count[num_Tcuts];
-int efficiencyDen_count[num_Tcuts];
+static const int num_Tcuts = 10;
+
+double thresholds[num_Tcuts];
+double efficiencyNum_count[num_Tcuts];
+double efficiencyDen_count;
+
 //int accepted_count[num_Tcuts];
-int fake_count[num_Tcuts];
+//int fake_count[num_Tcuts];
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
 
@@ -59,7 +62,7 @@ public :
    vector<float>   *L1Muon_Pts;
    vector<float>   *HOReco_Etas;
    vector<float>   *HOReco_Phis;
-   vector<float>   *HOReco_Energies;
+   vector<float>   *HOReco_Pts;
    vector<float>   *hltMu5_Etas;
    vector<float>   *hltMu5_Phis;
    vector<float>   *hltMu5_Pts;
@@ -86,7 +89,7 @@ public :
    TBranch        *b_L1Muon_Pts;   //!
    TBranch        *b_HOReco_Etas;   //!
    TBranch        *b_HOReco_Phis;   //!
-   TBranch        *b_HOReco_Energies;   //!
+   TBranch        *b_HOReco_Pts;   //!
    TBranch        *b_hltMu5_Etas;   //!
    TBranch        *b_hltMu5_Phis;   //!
    TBranch        *b_hltMu5_Pts;   //!
@@ -153,7 +156,7 @@ void HOMuon_TreeLoop_Efficiency::Init(TTree *tree)
    L1Muon_Pts = 0;
    HOReco_Etas = 0;
    HOReco_Phis = 0;
-   HOReco_Energies = 0;
+   HOReco_Pts = 0;
    hltMu5_Etas = 0;
    hltMu5_Phis = 0;
    hltMu5_Pts = 0;
@@ -183,7 +186,7 @@ void HOMuon_TreeLoop_Efficiency::Init(TTree *tree)
    fChain->SetBranchAddress("L1Muon_Pts", &L1Muon_Pts, &b_L1Muon_Pts);
    fChain->SetBranchAddress("HOReco_Etas", &HOReco_Etas, &b_HOReco_Etas);
    fChain->SetBranchAddress("HOReco_Phis", &HOReco_Phis, &b_HOReco_Phis);
-   fChain->SetBranchAddress("HOReco_Energies", &HOReco_Energies, &b_HOReco_Energies);
+   fChain->SetBranchAddress("HOReco_Pts", &HOReco_Pts, &b_HOReco_Pts);
    fChain->SetBranchAddress("hltMu5_Etas", &hltMu5_Etas, &b_hltMu5_Etas);
    fChain->SetBranchAddress("hltMu5_Phis", &hltMu5_Phis, &b_hltMu5_Phis);
    fChain->SetBranchAddress("hltMu5_Pts", &hltMu5_Pts, &b_hltMu5_Pts);

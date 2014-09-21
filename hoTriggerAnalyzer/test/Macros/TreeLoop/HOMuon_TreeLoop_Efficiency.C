@@ -37,11 +37,12 @@ void HOMuon_TreeLoop_Efficiency::Begin(TTree * /*tree*/)
 
    TString option = GetOption();
    
+   efficiencyDen_count=0;
    for(int i_Tcut=0; i_Tcut < num_Tcuts; i_Tcut++){
+     thresholds[i_Tcut]=(double)0.05+0.05*i_Tcut;
      efficiencyNum_count[i_Tcut]=0;
-     efficiencyDen_count[i_Tcut]=0;
      //accepted_count[i_Tcut]=0;
-     fake_count[i_Tcut]=0;
+     //fake_count[i_Tcut]=0;
    }
 }
 
@@ -78,9 +79,14 @@ Bool_t HOMuon_TreeLoop_Efficiency::Process(Long64_t entry)
   fChain->GetEntry(entry);
   if(entry%100 == 0) cout << entry << endl;
 
+  /*                                                                            
+   * Weighting Information                                                      
+   */
+  double weight = Generator_Weights;
   
   /*  
-  // Select Only L1 Muons inside the Barrel
+   * Select L1 Muons inside the Barrel
+   */
   vector<unsigned int> l1MuonBIndices;
   l1MuonBIndices.clear();
   for(unsigned int l1MuonB_index = 0; l1MuonB_index < L1Muon_Etas->size(); l1MuonB_index++){
@@ -88,22 +94,87 @@ Bool_t HOMuon_TreeLoop_Efficiency::Process(Long64_t entry)
     l1MuonBIndices.push_back(l1MuonB_index);
   }
 
+  /*
+   * L1 Muons in the Barrel Matched to an HLT
+   */
+
   for(unsigned int i =0; i< l1MuonBIndices.size(); i++){
-    TLoretnzVector l1MuonB;  //Kinematic Information is Stored 
+    float l1MuonB_eta, l1MuonB_phi;
     l1MuonB_eta = L1Muon_Etas->at(l1MuonBIndices[i]);
     l1MuonB_phi = L1Muon_Phis->at(l1MuonBIndices[i]);
-    l1MuonB_pt = L1Muon_Pts->at(l1MuonBIndices[i]);
-    for(unsigned int hoReco_index = 0; hoReco_index < HOReco_Etas->size(); hoReco_index++){
-      //Position Match HO to L1MuonB
-      horeco_eta = HOReco_Etas->at(hoReco_index);
-      horeco_phi = HOReco_Phis->at(hoReco_index);
-      horeco_energy = HOReco_Energies->at(hoReco_index);
-      if(isInsideRCut(RMip_Max, l1MuonB_eta, horeco_eta, l1MuonB_phi, horeco_phi)){
+    bool hasHlt = false; //Only takes one match to be true
+    for(unsigned int hltProp_index = 0; hltProp_index < hltMu5PropToRPC1_Etas->size(); hltProp_index++){
+      float hlt_eta, hlt_phi;
+      hlt_eta = hltMu5PropToRPC1_Etas->at(hltProp_index);
+      hlt_phi = hltMu5PropToRPC1_Phis->at(hltProp_index);
+      if(isInsideRCut(RHlt_Max, l1MuonB_eta, hlt_eta, l1MuonB_phi, hlt_phi)){
+        hasHlt = true; //Only takes one match to be true                                                    
+      }
+    }
+    if(hasHlt){
+      efficiencyDen_count+=weight;
+    }
+  }
+
+  /*
+   * Select L1 Barrel Muons, with a MIP
+   */
+
+  vector<unsigned int> l1MuonBMipIndices[num_Tcuts];
+  for(unsigned int i =0; i< l1MuonBIndices.size(); i++){
+    float l1MuonB_eta, l1MuonB_phi;
+    l1MuonB_eta = L1Muon_Etas->at(l1MuonBIndices[i]);
+    l1MuonB_phi = L1Muon_Phis->at(l1MuonBIndices[i]);
+    for(int i_Tcut=0; i_Tcut< num_Tcuts; i_Tcut++){
+      l1MuonBMipIndices[i_Tcut].clear();
+      bool hasMip = false; //Only takes one match to be true
+      for(unsigned int hoReco_index = 0; hoReco_index < HOReco_Etas->size(); hoReco_index++){
+	float horeco_eta, horeco_phi, horeco_energy;
+	std::string hoRecoL1MuonBEvent_key = "HO_Reco_L1MuonBEvent";
+	horeco_eta = HOReco_Etas->at(hoReco_index);
+	horeco_phi = HOReco_Phis->at(hoReco_index);
+	horeco_energy = HOReco_Pts->at(hoReco_index);
+	//Position Match HO Rec Hit to L1MuonB 
+	if(isInsideRCut(RMip_Max, l1MuonB_eta, horeco_eta, l1MuonB_phi, horeco_phi)){
+	  //Select Rec Hits Above Threshold set Mips
+	  if(horeco_energy > thresholds[i_Tcut]){
+	    hasMip = true;
+	  }
+	}
+      }
+      if(hasMip){
+	l1MuonBMipIndices[i_Tcut].push_back(l1MuonBIndices[i]);
       }
     }
   }
-    
-  */
+
+  /*                                                        
+   * L1 Muons in the Barrel With MIP  Matched to HLT Props                                                   
+   */
+  
+  for(int i_Tcut=0; i_Tcut < num_Tcuts; i_Tcut++){
+    // if(l1MuonBMipIndices[i_Tcut].size()!=0) cout << "Number of Non Zero Mip Indices" << l1MuonBMipIndices[i_Tcut].size() << endl;
+    for(unsigned int i =0; i< l1MuonBMipIndices[i_Tcut].size(); i++){
+      float l1MuonBMip_eta, l1MuonBMip_phi;
+      //cout << i_Tcut << ":" << l1MuonBMipIndices[i_Tcut][0] << endl;
+      l1MuonBMip_eta = L1Muon_Etas->at(l1MuonBMipIndices[i_Tcut][i]);
+      l1MuonBMip_phi = L1Muon_Phis->at(l1MuonBMipIndices[i_Tcut][i]);
+      
+      bool hasHlt = false; //Only takes one match to be true  
+      for(unsigned int hltProp_index = 0; hltProp_index < hltMu5PropToRPC1_Etas->size(); hltProp_index++){
+	float hlt_eta, hlt_phi;
+	hlt_eta = hltMu5PropToRPC1_Etas->at(hltProp_index);
+	hlt_phi = hltMu5PropToRPC1_Phis->at(hltProp_index);
+	if(isInsideRCut(RHlt_Max, l1MuonBMip_eta, hlt_eta, l1MuonBMip_phi, hlt_phi)){
+	  hasHlt = true; //Only takes one match to be true 
+	}
+	}
+      if(hasHlt){
+	efficiencyNum_count[i_Tcut]+=weight;
+      }
+      
+    }
+  }
 
   return kTRUE;
 }
@@ -121,7 +192,11 @@ void HOMuon_TreeLoop_Efficiency::Terminate()
    // The Terminate() function is the last function to be called during
    // a query. It always runs on the client, it can be used to present
    // the results graphically or save the results to file.
-
+  cout << "Efficiency Denominator Count:" << efficiencyDen_count << endl;
+  cout << "Efficiency Numerator Count:" << endl;
+  for(int i_Tcut; i_Tcut < num_Tcuts; i_Tcut++){
+    cout << "     Threshold " << thresholds[i_Tcut] << ": " << efficiencyNum_count[i_Tcut] << endl;
+  }
 }
 
 bool HOMuon_TreeLoop_Efficiency::isInsideRCut(float deltaR_Max, float eta1, float eta2, float phi1, float phi2){
