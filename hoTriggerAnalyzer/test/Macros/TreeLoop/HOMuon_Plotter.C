@@ -27,7 +27,7 @@
 #define VERSION "Version_4_2/"
 #define ROOTFILE_NAME "HOMuonTree.root"
 #define TREE_LOC "demo/ho_muon_tree"
-#define MAX_EVENTS 500000
+#define MAX_EVENTS 1000000000  //Default Max
 
 void HOMuon_Plotter(){  
   
@@ -50,6 +50,6 @@ void HOMuon_Plotter(){
   //HOMuon_Loop_Plotter looper;
   //looper.Loop();
   //looper.Show(16);
-  cout << "working" << endl;
+  //cout << "working" << endl;
 };
   

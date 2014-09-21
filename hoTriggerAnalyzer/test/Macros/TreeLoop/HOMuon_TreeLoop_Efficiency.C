@@ -36,12 +36,13 @@ void HOMuon_TreeLoop_Efficiency::Begin(TTree * /*tree*/)
    // The tree argument is deprecated (on PROOF 0 is passed).
 
    TString option = GetOption();
-   /*
+   
    for(int i_Tcut=0; i_Tcut < num_Tcuts; i_Tcut++){
-     efficiency_count[i_Tcut]=0;
-     accepted_count[i_Tcut]=0;
+     efficiencyNum_count[i_Tcut]=0;
+     efficiencyDen_count[i_Tcut]=0;
+     //accepted_count[i_Tcut]=0;
      fake_count[i_Tcut]=0;
-   */
+   }
 }
 
 void HOMuon_TreeLoop_Efficiency::SlaveBegin(TTree * /*tree*/)
@@ -78,7 +79,7 @@ Bool_t HOMuon_TreeLoop_Efficiency::Process(Long64_t entry)
   if(entry%100 == 0) cout << entry << endl;
 
   
-  /*
+  /*  
   // Select Only L1 Muons inside the Barrel
   vector<unsigned int> l1MuonBIndices;
   l1MuonBIndices.clear();
@@ -96,14 +97,13 @@ Bool_t HOMuon_TreeLoop_Efficiency::Process(Long64_t entry)
       //Position Match HO to L1MuonB
       horeco_eta = HOReco_Etas->at(hoReco_index);
       horeco_phi = HOReco_Phis->at(hoReco_index);
-      horeco_energy = HOReco_Pts->at(hoReco_index);
+      horeco_energy = HOReco_Energies->at(hoReco_index);
       if(isInsideRCut(RMip_Max, l1MuonB_eta, horeco_eta, l1MuonB_phi, horeco_phi)){
       }
     }
   }
-  */
     
-
+  */
 
   return kTRUE;
 }
