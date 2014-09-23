@@ -37,8 +37,6 @@
 
 //#include "HoMuonTrigger/hoTriggerAnalyzer/interface/HistogramBuilder.h"
 
-
-
 void HOMuon_TreeLoop_Plotter::Begin(TTree * /*tree*/)
 {
    // The Begin() function is called at the start of the query.
@@ -90,22 +88,7 @@ Bool_t HOMuon_TreeLoop_Plotter::Process(Long64_t entry)
    */  
   double weight = Generator_Weights;
 
-  std::string countAllEvents_key = "Events_All";
-  std::string countAllEventsW_key = "Weighted Events";
-  histogramBuilder.fillCountHistogram(countAllEvents_key);
-  histogramBuilder.fillCountHistogram(countAllEventsW_key, weight);
 
-  /*
-   * L1 Muons
-   */
-  std::string l1Muon_key = "l1Muon";
-  for(unsigned int l1Muon_index = 0; l1Muon_index < L1Muon_Etas->size(); l1Muon_index++){
-    histogramBuilder.fillEtaPhiHistograms(L1Muon_Etas->at(l1Muon_index),
-                                          L1Muon_Phis->at(l1Muon_index),
-                                          l1Muon_key, weight);
-    histogramBuilder.fillL1MuonPtHistograms(L1Muon_Pts->at(l1Muon_index), l1Muon_key, weight);
-    histogramBuilder.fillCountHistogram(l1Muon_key, weight);
-  }
 
   /*
    * L1 Muon Barrel
@@ -127,70 +110,6 @@ Bool_t HOMuon_TreeLoop_Plotter::Process(Long64_t entry)
   }
 
   /*
-   * HO Rec Hit
-   */
-  for(unsigned int hoReco_index = 0; hoReco_index < HOReco_Etas->size(); hoReco_index++){
-    std::string hoReco_key = "HO_Reco";
-    histogramBuilder.fillEtaPhiHistograms(HOReco_Etas->at(hoReco_index),
-                                          HOReco_Phis->at(hoReco_index),
-                                          hoReco_key, weight);
-    histogramBuilder.fillEnergyHistograms(HOReco_Energies->at(hoReco_index),
-					  hoReco_key, weight); //Typo in Tree Builder should have been labeled HOeco_Energies
-  }
-
-  /*
-   * Generator Muon
-   */
-
-  for(unsigned int genMuon_index = 0; genMuon_index < Generator_Etas->size(); genMuon_index++){
-    std::string genMuon_key = "Generator Muons";
-    histogramBuilder.fillCountHistogram(genMuon_key,weight);
-    histogramBuilder.fillEtaPhiHistograms(Generator_Etas->at(genMuon_index),
-                                          Generator_Phis->at(genMuon_index),
-                                          genMuon_key);
-  }
-
-  /*
-   * Generator Muon Propagated
-   */
-
-  for(unsigned int genMuonProp_index = 0; genMuonProp_index < GenMuonPropToHO_Etas->size(); genMuonProp_index++){
-    std::string genMuon_Prop_key = "genMuon_Prop";
-    histogramBuilder.fillCountHistogram(genMuon_Prop_key,weight);
-    histogramBuilder.fillEtaPhiHistograms(GenMuonPropToHO_Etas->at(genMuonProp_index),
-                                          GenMuonPropToHO_Phis->at(genMuonProp_index),
-                                          genMuon_Prop_key);
-  }
-
-
-  /*
-   * Higher Level Trigger Single Mu 5
-   */
-
-  for(unsigned int hltMu5_index = 0; hltMu5_index < hltMu5_Etas->size(); hltMu5_index++){
-    std::string hltMu5_key = "hltMu5";
-    histogramBuilder.fillCountHistogram(hltMu5_key,weight);
-    histogramBuilder.fillEtaPhiHistograms(hltMu5_Etas->at(hltMu5_index),
-					  hltMu5_Phis->at(hltMu5_index),
-					  hltMu5_key);
-    histogramBuilder.fillPtHistograms(hltMu5_Pts->at(hltMu5_index),
-				      hltMu5_key, weight);
-  }
-
-  /*
-   * Higher Level Trigger Single Mu 5 Propagated
-   */
-
-  for(unsigned int hltProp_index = 0; hltProp_index < hltMu5PropToRPC1_Etas->size(); hltProp_index++){
-    std::string hltMu5_Prop_key = "hltMu5_Prop";
-    histogramBuilder.fillCountHistogram(hltMu5_Prop_key,weight);
-    histogramBuilder.fillEtaPhiHistograms(hltMu5PropToRPC1_Etas->at(hltProp_index),
-					  hltMu5PropToRPC1_Phis->at(hltProp_index),
-					  hltMu5_Prop_key);
-  }
-
-
-  /*
    * HO Rec Hits Matched to a L1 Muon Barrel, Makes L1MuonBwithMips
    *Select events using indices saved in the L1MuonBIndices Vector
    */
@@ -201,6 +120,7 @@ Bool_t HOMuon_TreeLoop_Plotter::Process(Long64_t entry)
     l1MuonB_eta = L1Muon_Etas->at(l1MuonBIndices[i]);
     l1MuonB_phi = L1Muon_Phis->at(l1MuonBIndices[i]);
     l1MuonB_pt = L1Muon_Pts->at(l1MuonBIndices[i]);
+    float maxMatchHOReco_Energy = 0;
     bool hasMip = false; //Only takes one match to be true
     for(unsigned int hoReco_index = 0; hoReco_index < HOReco_Etas->size(); hoReco_index++){
       float horeco_eta, horeco_phi, horeco_energy;
@@ -219,7 +139,8 @@ Bool_t HOMuon_TreeLoop_Plotter::Process(Long64_t entry)
       
       // Position Match HO Rec Hit to L1MuonB
       
-       if(isInsideRCut(RMip_Max, l1MuonB_eta, horeco_eta, l1MuonB_phi, horeco_phi)){
+      if(isInsideRCut(RMip_Max, l1MuonB_eta, horeco_eta, l1MuonB_phi, horeco_phi)){
+	if(horeco_energy > maxMatchHOReco_Energy) maxMatchHOReco_Energy = horeco_energy;
 	std::string hoRecoMatchL1MuonB_key = "HOReco_Match_L1MuonB";
 	histogramBuilder.fillCountHistogram(hoRecoMatchL1MuonB_key,weight);
 	histogramBuilder.fillEnergyHistograms(horeco_energy,
@@ -240,8 +161,9 @@ Bool_t HOMuon_TreeLoop_Plotter::Process(Long64_t entry)
 							  l1MuonB_phi, horeco_phi,
 							  hoReco_L1MuonBMip_key, weight);
 	}
-       }
+      }
     }
+    histogramBuilder.fillEnergyHistograms(maxMatchHOReco_Energy, "MaxHOReco_Match_L1MuonB", weight);
     //Fill histograms for L1MuonB with Mips
     if(hasMip){
       l1MuonBMipIndices.push_back(l1MuonBIndices[i]);
