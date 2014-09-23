@@ -39,7 +39,8 @@ void HistogramBuilderTwo::fillCountHistogram(std::string key, double weight){
     _h1Counter[key]->GetYaxis()->SetTitle("Counts");
   }                                                                             
   _h1Counter[key]->Fill(1, weight);
-}                                                                               
+}
+                                                                               
 
 /*      
  *Trigger Histograms
@@ -63,7 +64,7 @@ void HistogramBuilderTwo::fillWeightHistograms(float weight_val,std::string key,
   if(!_h1Weight.count(key)){                                                   
     _h1Weight[key] = new TH1F(Form("%s_Weight",key.c_str()),     
 					      Form("%s Weight",key.c_str()),  
-					      1000, 0, 1);
+					      15000, 0, 150);
     SetAxises(_h1Weight[key],"Weight", "Counts");
   }                                                      
                        
