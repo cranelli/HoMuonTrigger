@@ -89,13 +89,13 @@ Bool_t HOMuon_TreeLoop_Struct::Process(Long64_t entry)
   //Must be in the Barrel
   for(unsigned int l1MuonB_index = 0; l1MuonB_index < L1Muon_Etas->size(); l1MuonB_index++){
     if(fabs(L1Muon_Etas->at(l1MuonB_index)) > barrel_eta) continue;
-    L1MuonCand * l1MuonCand;
+    L1MuonCand l1MuonCand;
     //L1MuonCand * l1MuonCand = {0,0,0, false, false, 0, 0, 0, false, false, 0, 0, 0};
-    setL1Info(l1MuonB_index, l1MuonCand);
-    //setHOInfo(l1MuonCand);
-    //setHLTInfo(l1MuonCand);
-    //fillHistograms(l1MuonCand, weight);
-    free(l1MuonCand); //Clean Up Struct
+    setL1Info(l1MuonB_index, &l1MuonCand);
+    setHOInfo(&l1MuonCand);
+    setHLTInfo(&l1MuonCand);
+    fillHistograms(&l1MuonCand, weight);
+    //free(&l1MuonCand); //Clean Up Struct
   }
  return kTRUE;
 }
@@ -123,12 +123,16 @@ void HOMuon_TreeLoop_Struct::Terminate()
 }
 
 
-
-void HOMuon_TreeLoop_Struct::fillHistograms(struct L1MuonCand * l1MuonCand, double weight){
+/*
+ * Analyzes Data stored in HO Tree to Make Histograms
+ * The Key names are based on the conditions the events must pass
+ */
+void HOMuon_TreeLoop_Struct::fillHistograms(L1MuonCand * l1MuonCand, double weight){
   
   //L1 Muon in the Barrel
   string key = "L1Muon_B";
   fillL1Muon_HO_Histograms(l1MuonCand, weight, key);
+  
   
   //L1 Muon in the Barrel with a MIP
   if(l1MuonCand->hasMIP){
@@ -177,50 +181,59 @@ void HOMuon_TreeLoop_Struct::fillHistograms(struct L1MuonCand * l1MuonCand, doub
       fillDeltaL1Muon_HLT_Histograms(l1MuonCand, weight, key);
     }
   }
+ 
 }
     
 // Fill the L1Muon and HO Histograms
-void HOMuon_TreeLoop_Struct::fillL1Muon_HO_Histograms(struct L1MuonCand * l1MuonCand, double weight, string key){
+void HOMuon_TreeLoop_Struct::fillL1Muon_HO_Histograms( L1MuonCand * l1MuonCand, double weight, string key){
+  string l1muon_key = key + "_l1muon";
   
   histogramBuilder.fillCountHistogram(key,weight);
-  histogramBuilder.fillL1MuonPtHistograms(l1MuonCand->l1Muon_pt, key, weight);
+  
+  histogramBuilder.fillL1MuonPtHistograms(l1MuonCand->l1Muon_pt, l1muon_key, weight);
+  
   histogramBuilder.fillEtaPhiHistograms(l1MuonCand->l1Muon_eta, 
 					l1MuonCand->l1Muon_phi,
-					key, weight);
+					l1muon_key, weight);
   //Information for Max HO Rec Hits Matched to a L1 Muon Barrel
+  string horeco_key = key + "_horeco";
   histogramBuilder.fillEnergyHistograms(l1MuonCand->horeco_maxE_energy,
-					key, weight);
+					horeco_key, weight);
+  
 }
 
   
-void HOMuon_TreeLoop_Struct::fillDeltaL1Muon_HO_Histograms(struct L1MuonCand * l1MuonCand, double weight, string key){
+void HOMuon_TreeLoop_Struct::fillDeltaL1Muon_HO_Histograms( L1MuonCand * l1MuonCand, double weight, string key){
+  string l1muon_horeco_key = key + "_l1muon_horeco";
   histogramBuilder.fillDeltaEtaDeltaPhiHistograms(l1MuonCand->l1Muon_eta, l1MuonCand->horeco_maxE_eta,
 						  l1MuonCand->l1Muon_phi, l1MuonCand->horeco_maxE_phi,
-						  key, weight);
+						  l1muon_horeco_key, weight);
 }
  
 
 // L1 Muons in the Barrel  Matched to HLT Props
-void HOMuon_TreeLoop_Struct::fillHLT_Histograms(struct L1MuonCand * l1MuonCand, double weight, string key){
-  histogramBuilder.fillHLTPtHistograms(l1MuonCand->hlt_minR_pt, key, weight);
+void HOMuon_TreeLoop_Struct::fillHLT_Histograms( L1MuonCand * l1MuonCand, double weight, string key){
+  string hlt_key = key +"_hlt";
+  histogramBuilder.fillPtHistograms(l1MuonCand->hlt_minR_pt, hlt_key, weight);
 }
 
-void HOMuon_TreeLoop_Struct::fillDeltaL1Muon_HLT_Histograms(struct L1MuonCand * l1MuonCand, double weight, string key){
+void HOMuon_TreeLoop_Struct::fillDeltaL1Muon_HLT_Histograms( L1MuonCand * l1MuonCand, double weight, string key){
+  string l1muon_hlt_key = key + "l1muon_hlt";
   histogramBuilder.fillDeltaEtaDeltaPhiHistograms(l1MuonCand->l1Muon_eta, l1MuonCand->hlt_minR_eta,
 						  l1MuonCand->l1Muon_phi, l1MuonCand->hlt_minR_phi,
-						  key, weight);
+						  l1muon_hlt_key, weight);
 }
 
 
-void HOMuon_TreeLoop_Struct::setL1Info(unsigned int l1Muon_index, struct L1MuonCand * l1MuonCand){
+void HOMuon_TreeLoop_Struct::setL1Info(unsigned int l1Muon_index,  L1MuonCand * l1MuonCand){
   //l1MuonCand->l1Muon_index = l1Muon_index;
   //cout << L1Muon_Etas->at(l1Muon_index) << endl;
-  //l1MuonCand->l1Muon_eta = L1Muon_Etas->at(l1Muon_index);
-  //l1MuonCand->l1Muon_phi = L1Muon_Phis->at(l1Muon_index);
-  //l1MuonCand->l1Muon_pt = L1Muon_Pts->at(l1Muon_index);
+  l1MuonCand->l1Muon_eta = L1Muon_Etas->at(l1Muon_index);
+  l1MuonCand->l1Muon_phi = L1Muon_Phis->at(l1Muon_index);
+  l1MuonCand->l1Muon_pt = L1Muon_Pts->at(l1Muon_index);
 }
 
-void HOMuon_TreeLoop_Struct::setHOInfo(struct L1MuonCand * l1MuonCand){
+void HOMuon_TreeLoop_Struct::setHOInfo( L1MuonCand * l1MuonCand){
   int maxE_horeco_index=-1;
   float maxE_horeco_energy =0; //Maximum HOReco Energy within DeltaR of L1Muon
   bool hasMIP = false;
@@ -255,7 +268,7 @@ void HOMuon_TreeLoop_Struct::setHOInfo(struct L1MuonCand * l1MuonCand){
   l1MuonCand->hasMIP=hasMIP;
 }
 
-void HOMuon_TreeLoop_Struct::setHLTInfo(struct L1MuonCand * l1MuonCand){
+void HOMuon_TreeLoop_Struct::setHLTInfo( L1MuonCand * l1MuonCand){
   int hlt_index = -1;
   float min_hlt_R2 = 100; //Matches To Nearest HLT
   bool HLT_InEvent = false;

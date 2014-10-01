@@ -24,7 +24,7 @@
 
 //Define Constants for the Tree Analyzer
 static const float barrel_eta = 1.3;
-static const float threshold = 0.6;
+static const float threshold = 0.3;
 static const float RMip_Max = 0.2;
 static const float RHlt_Max = 0.4;
 

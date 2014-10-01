@@ -42,8 +42,6 @@ void HOMuon_Struct(){
   //gRoot->ProcessLine(".L HOMuon_TreeLoop_FrontBack_Struct.C+");
   T->Process("HOMuon_TreeLoop_Struct.C+", "",MAX_EVENTS);
 
-
-
   //For MakeClass
   //gROOT->ProcessLine(".L HOMuon_Loop_Struct.C");
   //gROOT->ProcessLine(".L ../../plugins/HistogramBuilder.cc");

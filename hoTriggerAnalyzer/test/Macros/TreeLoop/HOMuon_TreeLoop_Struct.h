@@ -30,7 +30,8 @@ static const float RHlt_Max = 0.4;
 
 
 
-struct L1MuonCand{
+class L1MuonCand{
+ public:
   float l1Muon_eta;
   float l1Muon_phi;
   float l1Muon_pt;
@@ -44,10 +45,6 @@ struct L1MuonCand{
   float hlt_minR_eta;
   float hlt_minR_phi;
   float hlt_minR_pt;
-};
-
-class test{
-  float testfloat;
 };
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
@@ -135,14 +132,14 @@ public :
     */
    float calcDeltaR2(float eta1, float eta2, float phi1, float phi2);
    float WrapCheck(float phi1, float phi2);
-   void setL1Info(unsigned int l1Muon_index, struct L1MuonCand * l1MuonCand);
-   void setHOInfo(struct L1MuonCand *l1MuonCand);
-   void setHLTInfo(struct L1MuonCand * l1MuonCand);
-   void fillHistograms(struct L1MuonCand * l1MuonCand, double weight);
-   void fillL1Muon_HO_Histograms(struct L1MuonCand * l1MuonCand, double weight, string key);
-   void fillDeltaL1Muon_HO_Histograms(struct L1MuonCand * l1MuonCand, double weight, string key);
-   void fillHLT_Histograms(struct L1MuonCand * l1MuonCand, double weight, string key);
-   void fillDeltaL1Muon_HLT_Histograms(struct L1MuonCand * l1MuonCand, double weight, string key);
+   void setL1Info(unsigned int l1Muon_index,  L1MuonCand * l1MuonCand);
+   void setHOInfo( L1MuonCand *l1MuonCand);
+   void setHLTInfo( L1MuonCand * l1MuonCand);
+   void fillHistograms( L1MuonCand * l1MuonCand, double weight);
+   void fillL1Muon_HO_Histograms( L1MuonCand * l1MuonCand, double weight, string key);
+   void fillDeltaL1Muon_HO_Histograms( L1MuonCand * l1MuonCand, double weight, string key);
+   void fillHLT_Histograms( L1MuonCand * l1MuonCand, double weight, string key);
+   void fillDeltaL1Muon_HLT_Histograms( L1MuonCand * l1MuonCand, double weight, string key);
    ClassDef(HOMuon_TreeLoop_Struct,0);
 };
 
