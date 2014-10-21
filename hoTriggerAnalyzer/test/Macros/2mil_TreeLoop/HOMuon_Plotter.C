@@ -14,17 +14,12 @@
 #include <vector>
 #include <TROOT.h>
 
-//MakeSelector
-//#include "HoMuonTrigger/hoTriggerAnalyzer/test/Macros/HOMuon_TreeLoop_Plotter.h"
-//MakeClass
-//#include "HoMuonTrigger/hoTriggerAnalyzer/test/Macros/HOMuon_Loop_Plotter.h"
-
 /*
  *Definitions (easy to modify)
  */
 
 #define ROOTFILE_DIR "/data/users/cranelli/HOL1Muon/Trees/"
-#define VERSION "Version_5_1/"
+#define VERSION "Version_4_2/"
 #define ROOTFILE_NAME "HOMuonTree.root"
 #define TREE_LOC "demo/ho_muon_tree"
 #define MAX_EVENTS 1000000000  //Default Max
@@ -34,22 +29,11 @@ void HOMuon_Plotter(){
   std::stringstream rootFileLoc;
   rootFileLoc << ROOTFILE_DIR << VERSION << ROOTFILE_NAME;
   TFile* inFile = TFile::Open(rootFileLoc.str().c_str());
-  
-  //TFile* inFile = TFile::Open(ROOTFILE_LOC);
-  //std::cout << inFile << std::endl;
+
   TTree* T = (TTree*)inFile->Get(TREE_LOC);
   cout<< T << endl;
   //gRoot->ProcessLine(".L HOMuon_TreeLoop_FrontBack_Plotter.C+");
   T->Process("HOMuon_TreeLoop_Plotter.C+", "",MAX_EVENTS);
 
-
-
-  //For MakeClass
-  //gROOT->ProcessLine(".L HOMuon_Loop_Plotter.C");
-  //gROOT->ProcessLine(".L ../../plugins/HistogramBuilder.cc");
-  //HOMuon_Loop_Plotter looper;
-  //looper.Loop();
-  //looper.Show(16);
-  //cout << "working" << endl;
 };
   

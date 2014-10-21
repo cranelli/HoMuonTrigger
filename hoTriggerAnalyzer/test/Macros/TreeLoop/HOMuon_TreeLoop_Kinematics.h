@@ -20,6 +20,7 @@
 
 // Header file for the classes stored in the TTree if any.
 #include <vector>
+#include <list>
 //#include <map>
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
@@ -101,6 +102,10 @@ public :
    //My Stuff
    TFile * outRootFile;
    HistogramBuilderTwo histogramBuilder;
+
+   //To Figure Out L1 Muon Variable Binning
+   std::list<float> listL1MuonPt;
+   std::list<float> listHLTMuonPt;
 
    /*
     * Helper Functions

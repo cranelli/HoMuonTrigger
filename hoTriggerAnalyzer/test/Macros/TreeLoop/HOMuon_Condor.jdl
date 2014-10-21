@@ -1,0 +1,14 @@
+universe = vanilla
+Executable = ./HOMuon_Condor.sh
+#Executable = ./LNuAAsub.sh
+should_transfer_files = NO
+##should_transfer_files = YES
+##when_to_transfer_output = ON_EXIT
+##transfer_input_files = ../data/chan_qual_0.txt,../data/test_pedestals.txt,../data/test_pedestalWidths.txt, ..//data/test_gains.txt
+notify_user = Christopher.Anelli@gmail.com
+Output = Condor_HOMuon_$(cluster)_$(process).stdout
+Error  = Condor_HOMuon_$(cluster)_$(process).stderr
+Log    = Condor_HOMuon_$(cluster)_$(process).condor
+Arguments = $(cluster) $(process) /home/cranelli/HO_Muon/Spring14/FLAT_QCD/CMSSW_7_0_0/src/HoMuonTrigger/hoTriggerAnalyzer/test/Macros/TreeLoop/
+
+Queue 1

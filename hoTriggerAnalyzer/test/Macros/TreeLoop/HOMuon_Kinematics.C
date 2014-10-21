@@ -27,7 +27,7 @@
 #define VERSION "Version_5_1/"
 #define ROOTFILE_NAME "HOMuonTree.root"
 #define TREE_LOC "demo/ho_muon_tree"
-#define MAX_EVENTS 1000000000  //Default Max
+#define MAX_EVENTS  20000000 // Default Max 1000000000  
 
 void HOMuon_Kinematics(){  
   

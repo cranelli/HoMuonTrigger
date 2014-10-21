@@ -46,7 +46,7 @@ void HOMuon_TreeLoop_Kinematics::Begin(TTree * /*tree*/)
    // The tree argument is deprecated (on PROOF 0 is passed).
 
    TString option = GetOption();
-   outRootFile = TFile::Open("L1Muon_KinematicHistograms.root", "RECREATE");
+   outRootFile = TFile::Open("L1Muon_Kinematics.root", "RECREATE");
 
 }
 
@@ -89,67 +89,70 @@ Bool_t HOMuon_TreeLoop_Kinematics::Process(Long64_t entry)
    * Weighting Information
    */  
   double weight = Generator_Weights;
-
+  
+  //if(weight <1.0) {
+    
   std::string countAllEvents_key = "All_Events";
   std::string countAllEventsW_key = "All_Events_Weighted";
   histogramBuilder.fillCountHistogram(countAllEvents_key);
   histogramBuilder.fillCountHistogram(countAllEventsW_key, weight);
   histogramBuilder.fillWeightHistograms(weight, countAllEvents_key);
   histogramBuilder.fillWeightHistograms(weight, countAllEventsW_key, weight);
-
+  
   /*
    * L1 Muons
    */
   std::string l1Muon_key = "l1Muon";
   for(unsigned int l1Muon_index = 0; l1Muon_index < L1Muon_Etas->size(); l1Muon_index++){
     histogramBuilder.fillEtaPhiHistograms(L1Muon_Etas->at(l1Muon_index),
-                                          L1Muon_Phis->at(l1Muon_index),
-                                          l1Muon_key, weight);
+					  L1Muon_Phis->at(l1Muon_index),
+					  l1Muon_key, weight);
     histogramBuilder.fillL1MuonPtHistograms(L1Muon_Pts->at(l1Muon_index), l1Muon_key, weight);
     histogramBuilder.fillCountHistogram(l1Muon_key, weight);
+    listL1MuonPt.push_back(L1Muon_Pts->at(l1Muon_index));
   }
-
+    
   /*
    * HO Rec Hit
    */
   for(unsigned int hoReco_index = 0; hoReco_index < HOReco_Etas->size(); hoReco_index++){
     std::string hoReco_key = "HO_Reco";
     histogramBuilder.fillEtaPhiHistograms(HOReco_Etas->at(hoReco_index),
-                                          HOReco_Phis->at(hoReco_index),
-                                          hoReco_key, weight);
+					  HOReco_Phis->at(hoReco_index),
+					  hoReco_key, weight);
     histogramBuilder.fillEnergyHistograms(HOReco_Energies->at(hoReco_index),
 					  hoReco_key, weight); //Typo in Tree Builder should have been labeled HOeco_Energies
   }
-
+    
   /*
    * Generator Muon
    */
-
-  for(unsigned int genMuon_index = 0; genMuon_index < Generator_Etas->size(); genMuon_index++){
+  /*
+    for(unsigned int genMuon_index = 0; genMuon_index < Generator_Etas->size(); genMuon_index++){
     std::string genMuon_key = "Generator Muons";
     histogramBuilder.fillCountHistogram(genMuon_key,weight);
     histogramBuilder.fillEtaPhiHistograms(Generator_Etas->at(genMuon_index),
-                                          Generator_Phis->at(genMuon_index),
-                                          genMuon_key);
-  }
-
+    Generator_Phis->at(genMuon_index),
+    genMuon_key);
+    }
+  */
   /*
    * Generator Muon Propagated
    */
-
-  for(unsigned int genMuonProp_index = 0; genMuonProp_index < GenMuonPropToHO_Etas->size(); genMuonProp_index++){
+  /*
+    for(unsigned int genMuonProp_index = 0; genMuonProp_index < GenMuonPropToHO_Etas->size(); genMuonProp_index++){
     std::string genMuon_Prop_key = "genMuon_Prop";
     histogramBuilder.fillCountHistogram(genMuon_Prop_key,weight);
     histogramBuilder.fillEtaPhiHistograms(GenMuonPropToHO_Etas->at(genMuonProp_index),
-                                          GenMuonPropToHO_Phis->at(genMuonProp_index),
-                                          genMuon_Prop_key);
-  }
-
-
+    GenMuonPropToHO_Phis->at(genMuonProp_index),
+    genMuon_Prop_key);
+    }
+  */
+  
   /*
    * Higher Level Trigger Single Mu 5
    */
-
+  
   for(unsigned int hltMu5_index = 0; hltMu5_index < hltMu5_Etas->size(); hltMu5_index++){
     std::string hltMu5_key = "hltMu5";
     histogramBuilder.fillCountHistogram(hltMu5_key,weight);
@@ -158,12 +161,13 @@ Bool_t HOMuon_TreeLoop_Kinematics::Process(Long64_t entry)
 					  hltMu5_key);
     histogramBuilder.fillPtHistograms(hltMu5_Pts->at(hltMu5_index),
 				      hltMu5_key, weight);
+    listHLTMuonPt.push_back(hltMu5_Pts->at(hltMu5_index));
   }
-
-  /*
-   * Higher Level Trigger Single Mu 5 Propagated
-   */
-
+  
+    /*
+     * Higher Level Trigger Single Mu 5 Propagated
+     */
+  
   for(unsigned int hltProp_index = 0; hltProp_index < hltMu5PropToRPC1_Etas->size(); hltProp_index++){
     std::string hltMu5_Prop_key = "hltMu5_Prop";
     histogramBuilder.fillCountHistogram(hltMu5_Prop_key,weight);
@@ -172,7 +176,7 @@ Bool_t HOMuon_TreeLoop_Kinematics::Process(Long64_t entry)
 					  hltMu5_Prop_key);
   }
 
-  return kTRUE;
+return kTRUE;
 }
 
 void HOMuon_TreeLoop_Kinematics::SlaveTerminate()
@@ -190,11 +194,29 @@ void HOMuon_TreeLoop_Kinematics::Terminate()
    // the results graphically or save the results to file.
   
   cout << "working1" << endl;
+  
+//Only interested in unique values
+  listL1MuonPt.sort();
+  listL1MuonPt.unique();  //NB it is called after sort
+  cout <<"The list contains " << listL1MuonPt.size() << "unique entries:";
+  std::list<float>::iterator it;
+  for (it=listL1MuonPt.begin(); it!=listL1MuonPt.end(); ++it){
+    cout << ' ' << *it;
+  }
+  cout << endl;
+  listHLTMuonPt.sort();
+  listHLTMuonPt.unique();  //NB it is called after sort
+  cout <<"The list contains " << listHLTMuonPt.size() << "unique entries:";
+  std::list<float>::iterator it2;
+  for (it2=listHLTMuonPt.begin(); it2!=listHLTMuonPt.end(); ++it2){
+    cout << ' ' << *it2;
+  }
+  cout << endl;
+
   outRootFile->cd();
   outRootFile->Write();
   cout << "working2" << endl;
   
-
 }
 
 

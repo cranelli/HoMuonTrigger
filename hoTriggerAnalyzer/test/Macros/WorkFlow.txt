@@ -1,0 +1,7 @@
+After sending the crab jobs, all the relevant information should be held in a Tree.
+Stored in /data/users/cranelli/HOL1Muon/Trees/
+
+One can make basic Kinematic histograms (Pre Selection) by calling TreeLoop/HOMuon_Kinematics.C
+or histograms of interest by calling TreeLoop/HOMuon_Struct.C
+
+More complicated histograms can be made with secondaryPlots.C (Such as Efficiency, Background, and Bin Width Normalization)
